@@ -12,7 +12,7 @@ import (
 var startCmd = &cobra.Command{
 	Use:   "start [description]",
 	Short: "Start tracking time",
-	Long: `Start a new time tracking session for the current project.`,
+	Long:  `Start a new time tracking session for the current project.`,
 	Run: func(cmd* cobra.Command, args []string) {
 		db, err := storage.Initialize()
 		if err != nil {

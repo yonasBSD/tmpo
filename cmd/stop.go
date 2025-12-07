@@ -13,7 +13,7 @@ import (
 var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stop tracking time",
-	Long: `Stop the currently running time tracking session.`,
+	Long:  `Stop the currently running time tracking session.`,
 	Run: func(cmd* cobra.Command, args []string) {
 		db, err := storage.Initialize()
 		if err != nil {

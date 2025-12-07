@@ -2,35 +2,54 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"time"
 
+	"github.com/DylanDevelops/tmpo/internal/storage"
 	"github.com/spf13/cobra"
 )
 
-// statusCmd represents the status command
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Show current tracking status",
+	Long:  `Display information about the currently running time tracking session.`,
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("status called")
+	Run: func(cmd* cobra.Command, args []string) {
+		db, err := storage.Initialize()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+
+			os.Exit(1)
+		}
+		
+		defer db.Close()
+
+		running, err := db.GetRunningEntry()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+
+			os.Exit(1)
+		}
+
+		if running == nil {
+			fmt.Println("[tmpo] Not currently tracking time")
+			fmt.Println("\nUse 'tmpo start' to begin tracking")
+			
+			return
+		}
+
+		duration := time.Since(running.StartTime)
+
+		fmt.Printf("[tmpo] Currently tracking: %s\n", running.ProjectName)
+		fmt.Printf("	Started: %s\n", running.StartTime.Format("3:04 PM"))
+		fmt.Printf("	Duration: %s\n", formatDuration(duration))
+
+		if running.Description != "" {
+			fmt.Printf("	Description: %s\n", running.Description)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(statusCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// statusCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// statusCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
