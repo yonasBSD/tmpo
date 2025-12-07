@@ -42,3 +42,6 @@ coverage.txt
 .tmpo/
 .DS_Store
 node_modules/
+
+# Configuration
+.tmporc

@@ -17,7 +17,7 @@ import (
 type Config struct {
 	ProjectName string `yaml:"project_name"`
 	HourlyRate float64 `yaml:"hourly_rate,omitempty"`
-	Description string `yaml:"description, omitempty"`
+	Description string `yaml:"description,omitempty"`
 }
 
 // Load reads a YAML configuration file from the provided path and unmarshals it into a Config.
