@@ -41,11 +41,11 @@ var statusCmd = &cobra.Command{
 		duration := time.Since(running.StartTime)
 
 		fmt.Printf("[tmpo] Currently tracking: %s\n", running.ProjectName)
-		fmt.Printf("	Started: %s\n", running.StartTime.Format("3:04 PM"))
-		fmt.Printf("	Duration: %s\n", formatDuration(duration))
+		fmt.Printf("    Started: %s\n", running.StartTime.Format("3:04 PM"))
+		fmt.Printf("    Duration: %s\n", formatDuration(duration))
 
 		if running.Description != "" {
-			fmt.Printf("	Description: %s\n", running.Description)
+			fmt.Printf("    Description: %s\n", running.Description)
 		}
 	},
 }
