@@ -57,7 +57,7 @@ var initCmd = &cobra.Command{
 
 		fmt.Printf("[tmpo] Created .tmporc for project '%s'\n", name)
 		if hourlyRate > 0 {
-			fmt.Printf("	Hourly Rate: $%.2f\n", hourlyRate)
+			fmt.Printf("    Hourly Rate: $%.2f\n", hourlyRate)
 		}
 
 		fmt.Println("\nYou can edit .tmporc to customize your project settings.")
