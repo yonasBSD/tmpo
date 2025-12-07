@@ -2,35 +2,71 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
+	"github.com/DylanDevelops/tmpo/internal/storage"
 	"github.com/spf13/cobra"
 )
 
-// startCmd represents the start command
 var startCmd = &cobra.Command{
-	Use:   "start",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "start [description]",
+	Short: "Start tracking time",
+	Long:  `Start a new time tracking session for the current project.`,
+	Run: func(cmd* cobra.Command, args []string) {
+		db, err := storage.Initialize()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("start called")
+			os.Exit(1)
+		}
+
+		defer db.Close()
+
+		running, err := db.GetRunningEntry()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+
+			os.Exit(1)
+		}
+
+		if running != nil {
+			fmt.Fprintf(os.Stderr, "Error: Already tracking time for `%s\n", running.ProjectName)
+			fmt.Println("Use 'tmpo stop' to stop the current session first.")
+
+			os.Exit(1)
+		}
+
+		cwd, err := os.Getwd()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error getting current directory: %v\n", err)
+
+			os.Exit(1)
+		}
+		
+		projectName := filepath.Base(cwd)
+		
+		description := ""
+		if len(args) > 0 {
+			description = args[0]
+		}
+
+		entry, err := db.CreateEntry(projectName, description)
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+
+			os.Exit(1)
+		}
+
+		fmt.Printf("[tmpo] Started tracking time for '%s'\n", entry.ProjectName)
+
+		if description != "" {
+			fmt.Printf("	Description: %s\n", description)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// startCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// startCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
