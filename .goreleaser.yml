@@ -6,32 +6,10 @@ before:
 
 builds:
   # macOS (both Intel and Apple Silicon)
-  - id: darwin
+  - id: macos
+    goos: [darwin]
+    goarch: [amd64, arm64]
     binary: tmpo
-    env:
-      - CGO_ENABLED=1
-    goos:
-      - darwin
-    goarch:
-      - amd64
-      - arm64
-    ldflags:
-      - -s -w
-      - -X github.com/DylanDevelops/tmpo/cmd.Version={{.Version}}
-      - -X github.com/DylanDevelops/tmpo/cmd.Commit={{.Commit}}
-      - -X github.com/DylanDevelops/tmpo/cmd.Date={{.Date}}
-
-  # Windows
-  - id: windows
-    binary: tmpo
-    env:
-      - CGO_ENABLED=1
-      - CC=x86_64-w64-mingw32-gcc
-      - CXX=x86_64-w64-mingw32-g++
-    goos:
-      - windows
-    goarch:
-      - amd64
     ldflags:
       - -s -w
       - -X github.com/DylanDevelops/tmpo/cmd.Version={{.Version}}
@@ -40,14 +18,24 @@ builds:
 
   # Linux
   - id: linux
-    binary: tmpo
+    goos: [linux]
+    goarch: [amd64, arm64]
     env:
-      - CGO_ENABLED=1
-    goos:
-      - linux
-    goarch:
-      - amd64
-      - arm64
+      - CGO_ENABLED=0
+    binary: tmpo
+    ldflags:
+      - -s -w
+      - -X github.com/DylanDevelops/tmpo/cmd.Version={{.Version}}
+      - -X github.com/DylanDevelops/tmpo/cmd.Commit={{.Commit}}
+      - -X github.com/DylanDevelops/tmpo/cmd.Date={{.Date}}
+
+  # Windows
+  - id: windows
+    goos: [windows]
+    goarch: [amd64, arm64]
+    env:
+      - CGO_ENABLED=0
+    binary: tmpo
     ldflags:
       - -s -w
       - -X github.com/DylanDevelops/tmpo/cmd.Version={{.Version}}
@@ -107,11 +95,8 @@ brews:
     homepage: "https://github.com/DylanDevelops/tmpo"
     description: "Minimal CLI time tracker for developers"
     license: "MIT"
-
     skip_upload: true # Turn to false when first release is ready
-
     install: |
       bin.install "tmpo"
-
     test: |
       system "#{bin}/tmpo", "--version"

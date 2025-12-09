@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 // Database is a thin wrapper around an *sql.DB connection pool.
@@ -53,7 +53,7 @@ func Initialize() (*Database, error) {
 	}
 
 	dbPath := filepath.Join(tmpoDir, "tmpo.db")
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite", dbPath)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
