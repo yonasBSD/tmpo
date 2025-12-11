@@ -83,28 +83,26 @@ changelog:
   sort: asc
   abbrev: 0
   groups:
-    - title: Features
+    - title: ✨ Features
       regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
       order: 0
-    - title: 'Bug Fixes'
+    - title: 🐛 Fixes
       regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
       order: 1
-    - title: 'Performance Improvements'
-      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+    - title: 📚 Docs & Chores
+      regexp: '^.*?(docs?|chore|style|refactor)(\([[:word:]]+\))??!?:.+$'
       order: 2
-    - title: 'Documentation'
-      regexp: '^.*?docs?(\([[:word:]]+\))??!?:.+$'
+    - title: ⬆️ Dependencies
+      regexp: '^.*?(feat|fix|chore|build)\(deps?\):?.+$'
       order: 3
-    - title: 'Dependency Updates'
-      regexp: '^.*?(feat|fix|chore)\(deps?\):?.+$'
+    - title: 🚀 Performance
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
       order: 4
     - title: Other
       order: 999
   filters:
     exclude:
-      - '^docs:'
       - '^test:'
-      - '^chore:'
       - '^ci:'
       - Merge pull request
       - Merge remote-tracking branch
