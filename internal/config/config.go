@@ -14,11 +14,34 @@ import (
 // ProjectName is the human-readable name of the project.
 // HourlyRate is the billable hourly rate for the project; when zero it will be omitted from YAML.
 // Description is an optional free-form description of the project; when empty it will be omitted from YAML.
+//
+// ! IMPORTANT When adding new fields to this struct, also update configTemplate below. !
 type Config struct {
 	ProjectName string `yaml:"project_name"`
 	HourlyRate float64 `yaml:"hourly_rate,omitempty"`
 	Description string `yaml:"description,omitempty"`
 }
+
+// configTemplate is the template used when creating new .tmporc files via CreateWithTemplate.
+// It includes all available configuration options with helpful comments.
+//
+// Format placeholders:
+//   %s - project name (string)
+//   %.2f - hourly rate (float64, 2 decimal places)
+//
+// ! IMPORTANT: When adding new fields to the Config struct above, update this template. !
+const configTemplate = `# tmpo project configuration
+# This file configures time tracking settings for this project
+
+# Project name (used to identify time entries)
+project_name: %s
+
+# [OPTIONAL] Hourly rate for billing calculations (set to 0 to disable)
+hourly_rate: %.2f
+
+# [OPTIONAL] Description for this project
+description: ""
+`
 
 // Load reads a YAML configuration file from the provided path and unmarshals it into a Config.
 // It returns a pointer to the populated Config on success. If the file cannot be read or the
@@ -70,6 +93,24 @@ func Create(projectName string, hourlyRate float64) error {
 	}
 
 	return config.Save(tmporc)
+}
+
+// CreateWithTemplate creates a new .tmporc file with a user-friendly format that includes
+// all fields (even if empty) and helpful comments. This provides a better user experience
+// by showing all available configuration options.
+func CreateWithTemplate(projectName string, hourlyRate float64) error {
+	tmporc := filepath.Join(".", ".tmporc")
+	if _, err := os.Stat(tmporc); err == nil {
+		return fmt.Errorf(".tmporc already exists")
+	}
+
+	content := fmt.Sprintf(configTemplate, projectName, hourlyRate)
+
+	if err := os.WriteFile(tmporc, []byte(content), 0644); err != nil {
+		return fmt.Errorf("failed to write config: %w", err)
+	}
+
+	return nil
 }
 
 // FindAndLoad searches upward from the current working directory for a file named

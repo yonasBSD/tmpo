@@ -48,7 +48,7 @@ var initCmd = &cobra.Command{
 			}
 		}
 
-		err := config.Create(name, hourlyRate)
+		err := config.CreateWithTemplate(name, hourlyRate)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 
