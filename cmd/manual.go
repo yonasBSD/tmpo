@@ -164,7 +164,7 @@ var manualCmd = &cobra.Command{
 		if entry.HourlyRate != nil {
 			earnings := duration.Hours() * *entry.HourlyRate
 			fmt.Printf("    %s %s\n", ui.Info("Hourly Rate:"), fmt.Sprintf("$%.2f", *entry.HourlyRate))
-			fmt.Printf("    %s %s\n", ui.Info("Estimated Earnings:"), ui.Success(fmt.Sprintf("$%.2f", earnings)))
+			fmt.Printf("    %s %s\n", ui.Info("Earnings:"), fmt.Sprintf("$%.2f", earnings))
 		}
 
 		ui.NewlineBelow()

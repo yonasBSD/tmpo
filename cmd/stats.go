@@ -116,7 +116,7 @@ func ShowPeriodStats(entries []*storage.TimeEntry, periodName string) {
 	ui.PrintInfo(4, "Total Entries", fmt.Sprintf("%d", len(entries)))
 
 	if hasAnyEarnings {
-		fmt.Printf("    %s %s\n", ui.Info("Total Estimated Earnings:"), ui.Success(fmt.Sprintf("$%.2f", totalEarnings)))
+		ui.PrintInfo(4, "Earnings", fmt.Sprintf("$%.2f", totalEarnings))
 	}
 
 	fmt.Println()
@@ -126,7 +126,7 @@ func ShowPeriodStats(entries []*storage.TimeEntry, periodName string) {
 		fmt.Printf("        %-20s  %s  (%.1f%%)\n", project, ui.FormatDuration(duration), percentage)
 
 		if earnings, ok := projectEarnings[project]; ok && earnings > 0 {
-			fmt.Printf("        %s %s\n", ui.Muted("└─ Estimated Earnings:"), ui.Success(fmt.Sprintf("$%.2f", earnings)))
+			fmt.Printf("        %s %s\n", ui.Muted("└─ Earnings:"), fmt.Sprintf("$%.2f", earnings))
 		}
 	}
 
@@ -182,7 +182,7 @@ func ShowAllTimeStats(entries []*storage.TimeEntry, db *storage.Database) {
 	ui.PrintInfo(4, "Projects Tracked", fmt.Sprintf("%d", len(projects)))
 
 	if hasAnyEarnings {
-		fmt.Printf("    %s %s\n", ui.Info("Total Estimated Earnings:"), ui.Success(fmt.Sprintf("$%.2f", totalEarnings)))
+		ui.PrintInfo(4, "Earnings", fmt.Sprintf("$%.2f", totalEarnings))
 	}
 
 	fmt.Println()
@@ -192,7 +192,7 @@ func ShowAllTimeStats(entries []*storage.TimeEntry, db *storage.Database) {
 		fmt.Printf("        %-20s  %s  (%.1f%%)\n", project, ui.FormatDuration(duration), percentage)
 
 		if earnings, ok := projectEarnings[project]; ok && earnings > 0 {
-			fmt.Printf("        %s %s\n", ui.Muted("└─ Estimated Earnings:"), ui.Success(fmt.Sprintf("$%.2f", earnings)))
+			fmt.Printf("        %s %s\n", ui.Muted("└─ Earnings:"), fmt.Sprintf("$%.2f", earnings))
 		}
 	}
 
