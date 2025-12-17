@@ -65,11 +65,11 @@ var startCmd = &cobra.Command{
 		ui.PrintSuccess(ui.EmojiStart, fmt.Sprintf("Started tracking time for '%s'", entry.ProjectName))
 
 		if cfg, _, err := config.FindAndLoad(); err == nil && cfg != nil {
-			ui.PrintInfo(4, "Config Source", ".tmporc")
+			ui.PrintMuted(4, "└─ Config Source: .tmporc")
 		} else if project.IsInGitRepo() {
-			ui.PrintInfo(4, "Config Source", "git repository")
+			ui.PrintMuted(4, "└─ Config Source: git repository")
 		} else {
-			ui.PrintInfo(4, "Config Source", "directory name")
+			ui.PrintMuted(4, "└─ Config Source: directory name")
 		}
 
 		if description != "" {

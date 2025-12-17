@@ -161,6 +161,10 @@ var manualCmd = &cobra.Command{
 		ui.PrintInfo(4, "End", endTime.Format("Jan 2, 2006 at 3:04 PM"))
 		ui.PrintInfo(4, "Duration", ui.FormatDuration(duration))
 
+		if entry.Description != "" {
+			ui.PrintInfo(4, "Description", entry.Description)
+		}
+
 		if entry.HourlyRate != nil {
 			earnings := duration.Hours() * *entry.HourlyRate
 			fmt.Printf("    %s %s\n", ui.Info("Hourly Rate:"), fmt.Sprintf("$%.2f", *entry.HourlyRate))
