@@ -346,6 +346,7 @@ func validateTimeOptional(input string) error {
 }
 
 func init() {
-	editCmd.Flags().BoolVar(&showAllProjects, "show-all-projects", false, "Show project selection before entry selection")
 	rootCmd.AddCommand(editCmd)
+	
+	editCmd.Flags().BoolVar(&showAllProjects, "show-all-projects", false, "Show project selection before entry selection")
 }

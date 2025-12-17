@@ -545,6 +545,17 @@ func (d *Database) UpdateTimeEntry(id int64, entry *TimeEntry) error {
 	return nil
 }
 
+// DeleteTimeEntry deletes a time entry from the database by its ID.
+// Returns an error if the deletion fails. Does not verify that a row with the given ID exists;
+// if no rows are affected the function will still return nil (no error).
+func (d *Database) DeleteTimeEntry(id int64) error {
+	_, err := d.db.Exec("DELETE FROM time_entries WHERE id = ?", id)
+	if err != nil {
+		return fmt.Errorf("failed to delete entry: %w", err)
+	}
+	return nil
+}
+
 // Close closes the Database, releasing any underlying resources.
 // It delegates to the wrapped database's Close method and returns any error encountered.
 // After Close is called, the Database must not be used for further operations.
