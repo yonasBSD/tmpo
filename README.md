@@ -20,15 +20,15 @@
 
 ## Installation
 
-### Homebrew (macOS/Linux)
-
-```bash
-brew install tmpo
-```
-
-### Download Pre-built Binaries
+### Recommended: Download Pre-built Binaries
 
 Download the latest release for your platform from the [releases page](https://github.com/DylanDevelops/tmpo/releases).
+
+For detailed installation instructions for your platform:
+
+- [macOS Installation Guide](docs/installation/macos_installation.md)
+- [Linux Installation Guide](docs/installation/linux_installation.md)
+- [Windows Installation Guide](docs/installation/windows_installation.md)
 
 ### Build from Source
 
