@@ -17,6 +17,14 @@ const (
 	ColorGray   = "\033[90m" // Muted text
 )
 
+// ANSI Text Formatting Constants
+const (
+	FormatBold      = "\033[1m"
+	FormatDim       = "\033[2m"
+	FormatItalic    = "\033[3m"
+	FormatUnderline = "\033[4m"
+)
+
 // Emoji Constants
 const (
 	EmojiStart   = "✨"
@@ -33,25 +41,69 @@ const (
 	EmojiInfo    = "ℹ️"
 )
 
-// Colored output functions that return colored strings
+// Success colored output functions that returns colored string
 func Success(message string) string {
 	return ColorGreen + message + ColorReset
 }
 
+// Error colored output functions that returns colored string
 func Error(message string) string {
 	return ColorRed + message + ColorReset
 }
 
+// Info colored output functions that returns colored string
 func Info(message string) string {
 	return ColorBlue + message + ColorReset
 }
 
+// Warning colored output functions that returns colored string
 func Warning(message string) string {
 	return ColorYellow + message + ColorReset
 }
 
+// Muted colored output functions that returns colored string
 func Muted(message string) string {
 	return ColorGray + message + ColorReset
+}
+
+// Bold text formatting functions that return formatted string
+func Bold(message string) string {
+	return FormatBold + message + ColorReset
+}
+
+// Dim text formatting functions that return formatted string
+func Dim(message string) string {
+	return FormatDim + message + ColorReset
+}
+
+// Italic text formatting functions that return formatted string
+func Italic(message string) string {
+	return FormatItalic + message + ColorReset
+}
+
+// Underline text formatting functions that return formatted string
+func Underline(message string) string {
+	return FormatUnderline + message + ColorReset
+}
+
+// Bold success combined formatting functions for common use cases
+func BoldSuccess(message string) string {
+	return FormatBold + ColorGreen + message + ColorReset
+}
+
+// Bold error combined formatting functions for common use cases
+func BoldError(message string) string {
+	return FormatBold + ColorRed + message + ColorReset
+}
+
+// Bold info combined formatting functions for common use cases
+func BoldInfo(message string) string {
+	return FormatBold + ColorBlue + message + ColorReset
+}
+
+// Bold warning combined formatting functions for common use cases
+func BoldWarning(message string) string {
+	return FormatBold + ColorYellow + message + ColorReset
 }
 
 // PrintSuccess prints a success message with emoji and color to stdout

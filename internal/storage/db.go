@@ -426,6 +426,136 @@ func (d *Database) GetAllProjects() ([]string, error) {
 	return projects, nil
 }
 
+// GetProjectsWithCompletedEntries retrieves all distinct project names that have at least
+// one completed time entry (end_time IS NOT NULL) from the time_entries table.
+// The results are returned in ascending order by project_name.
+// On success it returns a slice of project names (which will be empty if no completed entries exist)
+// and a nil error. If the underlying database query or a row scan fails, it returns a
+// non-nil error describing the failure.
+func (d *Database) GetProjectsWithCompletedEntries() ([]string, error) {
+	rows, err := d.db.Query(`
+		SELECT DISTINCT project_name
+		FROM time_entries
+		WHERE end_time IS NOT NULL
+		ORDER BY project_name
+	`)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to query projects: %w", err)
+	}
+
+	defer rows.Close()
+
+	var projects []string
+
+	for rows.Next() {
+		var project string
+		if err := rows.Scan(&project); err != nil {
+			return nil, fmt.Errorf("failed to scan project: %w", err)
+		}
+
+		projects = append(projects, project)
+	}
+
+	return projects, nil
+}
+
+// GetCompletedEntriesByProject retrieves completed time entries (where end_time IS NOT NULL)
+// for the specified projectName from the time_entries table. Results are ordered by start_time
+// in descending order (newest first).
+//
+// For each row a TimeEntry is populated. Since this query only returns completed entries,
+// the EndTime field will always be non-nil. If the hourly_rate column is NULL the returned
+// TimeEntry.HourlyRate will be nil; otherwise HourlyRate will point to the scanned float64.
+//
+// On success the function returns a slice of pointers to TimeEntry. If there are no
+// matching rows the returned slice will have length 0 (it may be nil). On failure the
+// function returns a non-nil error and a nil slice. Errors may originate from the
+// query execution, row scanning, or row iteration.
+func (d *Database) GetCompletedEntriesByProject(projectName string) ([]*TimeEntry, error) {
+	rows, err := d.db.Query(`
+		SELECT id, project_name, start_time, end_time, description, hourly_rate
+		FROM time_entries
+		WHERE project_name = ? AND end_time IS NOT NULL
+		ORDER BY start_time DESC
+	`, projectName)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to query entries: %w", err)
+	}
+
+	defer rows.Close()
+
+	var entries []*TimeEntry
+
+	for rows.Next() {
+		var entry TimeEntry
+		var endTime sql.NullTime
+		var hourlyRate sql.NullFloat64
+
+		err := rows.Scan(&entry.ID, &entry.ProjectName, &entry.StartTime, &endTime, &entry.Description, &hourlyRate)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan entry: %w", err)
+		}
+
+		if endTime.Valid {
+			entry.EndTime = &endTime.Time
+		}
+
+		if hourlyRate.Valid {
+			entry.HourlyRate = &hourlyRate.Float64
+		}
+
+		entries = append(entries, &entry)
+	}
+
+	return entries, nil
+}
+
+// UpdateTimeEntry updates an existing time entry in the database with the values from the provided
+// TimeEntry. It updates the project_name, start_time, end_time, description and hourly_rate fields
+// for the entry with the matching ID.
+//
+// If the provided entry's EndTime is nil, the end_time column will be set to NULL.
+// If the provided entry's HourlyRate is nil, the hourly_rate column will be set to NULL.
+//
+// Returns an error if the update fails. Does not verify that a row with the given ID exists;
+// if no rows are affected the function will still return nil (no error).
+func (d *Database) UpdateTimeEntry(id int64, entry *TimeEntry) error {
+	var endTime sql.NullTime
+	if entry.EndTime != nil {
+		endTime = sql.NullTime{Time: *entry.EndTime, Valid: true}
+	}
+
+	var hourlyRate sql.NullFloat64
+	if entry.HourlyRate != nil {
+		hourlyRate = sql.NullFloat64{Float64: *entry.HourlyRate, Valid: true}
+	}
+
+	_, err := d.db.Exec(`
+		UPDATE time_entries
+		SET project_name = ?, start_time = ?, end_time = ?, description = ?, hourly_rate = ?
+		WHERE id = ?
+	`, entry.ProjectName, entry.StartTime, endTime, entry.Description, hourlyRate, id)
+
+	if err != nil {
+		return fmt.Errorf("failed to update entry: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteTimeEntry deletes a time entry from the database by its ID.
+// Returns an error if the deletion fails. Does not verify that a row with the given ID exists;
+// if no rows are affected the function will still return nil (no error).
+func (d *Database) DeleteTimeEntry(id int64) error {
+	_, err := d.db.Exec("DELETE FROM time_entries WHERE id = ?", id)
+	if err != nil {
+		return fmt.Errorf("failed to delete entry: %w", err)
+	}
+	return nil
+}
+
 // Close closes the Database, releasing any underlying resources.
 // It delegates to the wrapped database's Close method and returns any error encountered.
 // After Close is called, the Database must not be used for further operations.
