@@ -99,7 +99,11 @@ func TestIsInGitRepo(t *testing.T) {
 
 	t.Run("returns false when not in git repo", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		err := os.Chdir(tmpDir)
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
+
+		err = os.Chdir(tmpDir)
 		assert.NoError(t, err)
 
 		result := IsInGitRepo()
@@ -136,15 +140,14 @@ func TestGetGitRoot(t *testing.T) {
 }
 
 func TestDetectProject(t *testing.T) {
-	// Save original directory
-	originalDir, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(originalDir)
-
 	t.Run("detects from tmporc", func(t *testing.T) {
 		tmpDir := t.TempDir()
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
+
 		projectDir := filepath.Join(tmpDir, "my-cool-project")
-		err := os.MkdirAll(projectDir, 0755)
+		err = os.MkdirAll(projectDir, 0755)
 		assert.NoError(t, err)
 
 		// Create .tmporc
@@ -179,8 +182,12 @@ func TestDetectProject(t *testing.T) {
 
 	t.Run("falls back to directory name", func(t *testing.T) {
 		tmpDir := t.TempDir()
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
+
 		projectDir := filepath.Join(tmpDir, "fallback-project")
-		err := os.MkdirAll(projectDir, 0755)
+		err = os.MkdirAll(projectDir, 0755)
 		assert.NoError(t, err)
 
 		err = os.Chdir(projectDir)

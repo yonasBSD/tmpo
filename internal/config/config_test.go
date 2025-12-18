@@ -125,14 +125,13 @@ func TestSave(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	// Save original directory
-	originalDir, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(originalDir)
-
 	t.Run("creates config file", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		err := os.Chdir(tmpDir)
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
+
+		err = os.Chdir(tmpDir)
 		assert.NoError(t, err)
 
 		err = Create("new-project", 125.0)
@@ -152,7 +151,11 @@ func TestCreate(t *testing.T) {
 
 	t.Run("returns error if file exists", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		err := os.Chdir(tmpDir)
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
+
+		err = os.Chdir(tmpDir)
 		assert.NoError(t, err)
 
 		// Create initial file
@@ -167,14 +170,13 @@ func TestCreate(t *testing.T) {
 }
 
 func TestCreateWithTemplate(t *testing.T) {
-	// Save original directory
-	originalDir, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(originalDir)
-
 	t.Run("creates templated config file", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		err := os.Chdir(tmpDir)
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
+
+		err = os.Chdir(tmpDir)
 		assert.NoError(t, err)
 
 		err = CreateWithTemplate("templated-project", 99.99, "Test description")
@@ -202,7 +204,11 @@ func TestCreateWithTemplate(t *testing.T) {
 
 	t.Run("returns error if file exists", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		err := os.Chdir(tmpDir)
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
+
+		err = os.Chdir(tmpDir)
 		assert.NoError(t, err)
 
 		// Create initial file
@@ -217,16 +223,15 @@ func TestCreateWithTemplate(t *testing.T) {
 }
 
 func TestFindAndLoad(t *testing.T) {
-	// Save original directory
-	originalDir, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(originalDir)
-
 	t.Run("finds config in current directory", func(t *testing.T) {
 		tmpDir := t.TempDir()
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
+
 		configPath := filepath.Join(tmpDir, ".tmporc")
 		cfg := &Config{ProjectName: "current-dir"}
-		err := cfg.Save(configPath)
+		err = cfg.Save(configPath)
 		assert.NoError(t, err)
 
 		err = os.Chdir(tmpDir)
@@ -245,9 +250,13 @@ func TestFindAndLoad(t *testing.T) {
 
 	t.Run("finds config in parent directory", func(t *testing.T) {
 		tmpDir := t.TempDir()
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
+
 		configPath := filepath.Join(tmpDir, ".tmporc")
 		cfg := &Config{ProjectName: "parent-dir"}
-		err := cfg.Save(configPath)
+		err = cfg.Save(configPath)
 		assert.NoError(t, err)
 
 		// Create and change to subdirectory
@@ -270,7 +279,11 @@ func TestFindAndLoad(t *testing.T) {
 
 	t.Run("returns error when not found", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		err := os.Chdir(tmpDir)
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
+
+		err = os.Chdir(tmpDir)
 		assert.NoError(t, err)
 
 		found, path, err := FindAndLoad()
@@ -282,11 +295,14 @@ func TestFindAndLoad(t *testing.T) {
 
 	t.Run("uses nearest config file", func(t *testing.T) {
 		tmpDir := t.TempDir()
+		originalDir, err := os.Getwd()
+		assert.NoError(t, err)
+		defer os.Chdir(originalDir)
 
 		// Create config in root
 		rootConfig := filepath.Join(tmpDir, ".tmporc")
 		cfg := &Config{ProjectName: "root"}
-		err := cfg.Save(rootConfig)
+		err = cfg.Save(rootConfig)
 		assert.NoError(t, err)
 
 		// Create config in subdirectory
