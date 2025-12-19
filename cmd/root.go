@@ -19,7 +19,19 @@ var rootCmd = &cobra.Command{
 
 A minimal, developer-friendly time tracking tool that lives in your terminal.
 Track time effortlessly with automatic project detection and simple commands.`,
-	Version: Version,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Check if version flag was set
+		versionFlag, _ := cmd.Flags().GetBool("version")
+		
+		if versionFlag {
+			cmd.Print(GetVersionOutput())
+			checkForUpdates()
+			return
+		}
+
+		// Otherwise show help
+		cmd.Help()
+	},
 }
 
 func Execute() {
@@ -30,5 +42,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.SetVersionTemplate(GetVersionOutput())
+	rootCmd.Flags().BoolP("version", "v", false, "version for tmpo")
 }
