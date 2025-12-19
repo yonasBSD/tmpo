@@ -17,9 +17,15 @@ var versionCmd = &cobra.Command{
 	Long:  "Display the current version information including date and release URL.",
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print(GetVersionOutput())
-		checkForUpdates()
+		DisplayVersionWithUpdateCheck()
 	},
+}
+
+// DisplayVersionWithUpdateCheck displays the version information and checks for updates.
+// This is the single source of truth for displaying version info with update notifications.
+func DisplayVersionWithUpdateCheck() {
+	fmt.Print(GetVersionOutput())
+	checkForUpdates()
 }
 
 // GetVersionOutput returns the formatted version string used by both

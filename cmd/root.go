@@ -22,10 +22,9 @@ Track time effortlessly with automatic project detection and simple commands.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Check if version flag was set
 		versionFlag, _ := cmd.Flags().GetBool("version")
-		
+
 		if versionFlag {
-			cmd.Print(GetVersionOutput())
-			checkForUpdates()
+			DisplayVersionWithUpdateCheck()
 			return
 		}
 
