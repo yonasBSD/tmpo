@@ -1,10 +1,11 @@
-package cmd
+package entries
 
 import (
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/DylanDevelops/tmpo/internal/project"
 	"github.com/DylanDevelops/tmpo/internal/storage"
 	"github.com/DylanDevelops/tmpo/internal/ui"
 	"github.com/manifoldco/promptui"
@@ -13,11 +14,12 @@ import (
 
 var showAllProjects bool
 
-var editCmd = &cobra.Command{
-	Use:   "edit",
-	Short: "Edit an existing time entry",
-	Long:  `Edit an existing time entry using an interactive menu.`,
-	Run: func(cmd *cobra.Command, args []string) {
+func EditCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "edit",
+		Short: "Edit an existing time entry",
+		Long:  `Edit an existing time entry using an interactive menu.`,
+		Run: func(cmd *cobra.Command, args []string) {
 		ui.NewlineAbove()
 		ui.PrintSuccess("✏️", "Edit Time Entry")
 		fmt.Println()
@@ -60,7 +62,7 @@ var editCmd = &cobra.Command{
 			projectName = selectedProject
 		} else {
 			// Use current project
-			detectedProject, err := DetectProjectName()
+			detectedProject, err := project.DetectConfiguredProject()
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("detecting project: %v", err))
 				os.Exit(1)
@@ -311,6 +313,11 @@ var editCmd = &cobra.Command{
 		ui.PrintSuccess(ui.EmojiSuccess, "Entry updated successfully")
 		ui.NewlineBelow()
 	},
+	}
+
+	cmd.Flags().BoolVar(&showAllProjects, "show-all-projects", false, "Show project selection before entry selection")
+
+	return cmd
 }
 
 // formatEntryLabel formats a time entry for display in the selection list
@@ -347,10 +354,4 @@ func validateTimeOptional(input string) error {
 		return nil
 	}
 	return validateTime(input)
-}
-
-func init() {
-	rootCmd.AddCommand(editCmd)
-	
-	editCmd.Flags().BoolVar(&showAllProjects, "show-all-projects", false, "Show project selection before entry selection")
 }

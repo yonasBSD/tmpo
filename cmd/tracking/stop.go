@@ -1,4 +1,4 @@
-package cmd
+package tracking
 
 import (
 	"fmt"
@@ -10,10 +10,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var pauseCmd = &cobra.Command{
-	Use:   "pause",
-	Short: "Pause time tracking",
-	Long:  `Pause the currently running time tracking session. Use 'tmpo resume' to continue tracking.`,
+// stopCmd represents the stop command
+var stopCmd = &cobra.Command{
+	Use:   "stop",
+	Short: "Stop tracking time",
+	Long:  `Stop the currently running time tracking session.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ui.NewlineAbove()
 
@@ -32,8 +33,7 @@ var pauseCmd = &cobra.Command{
 		}
 
 		if running == nil {
-			ui.PrintWarning(ui.EmojiWarning, "No active time tracking session to pause.")
-			ui.NewlineBelow()
+			ui.PrintWarning(ui.EmojiWarning, "No active time tracking session.")
 			os.Exit(0)
 		}
 
@@ -45,14 +45,9 @@ var pauseCmd = &cobra.Command{
 
 		duration := time.Since(running.StartTime)
 
-		ui.PrintSuccess(ui.EmojiStop, fmt.Sprintf("Paused tracking %s", ui.Bold(running.ProjectName)))
-		ui.PrintInfo(4, ui.Bold("Session Duration"), ui.FormatDuration(duration))
-		ui.PrintMuted(4, "Use 'tmpo resume' to continue tracking")
+		ui.PrintSuccess(ui.EmojiStop, fmt.Sprintf("Stopped tracking %s", ui.Bold(running.ProjectName)))
+		ui.PrintInfo(4, ui.Bold("Total Duration"), ui.FormatDuration(duration))
 
 		ui.NewlineBelow()
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(pauseCmd)
 }

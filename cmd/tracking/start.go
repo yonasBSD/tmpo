@@ -1,4 +1,4 @@
-package cmd
+package tracking
 
 import (
 	"fmt"
@@ -39,7 +39,7 @@ var startCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		projectName, err := DetectProjectName()
+		projectName, err := project.DetectConfiguredProject()
 		if err != nil {
 			ui.PrintError(ui.EmojiError, fmt.Sprintf("detecting project: %v", err))
 			os.Exit(1)
@@ -78,25 +78,4 @@ var startCmd = &cobra.Command{
 
 		ui.NewlineBelow()
 	},
-}
-
-// DetectProjectName returns the name of the current project.
-// It first attempts to load a configuration via config.FindAndLoad; if a configuration
-// is found and its ProjectName field is non-empty, that value is returned.
-// If no configuration or project name is available, DetectProjectName falls back to
-// project.DetectProject() to determine the project name from the repository or environment.
-// The function returns the determined project name and any error encountered during
-// configuration loading or fallback detection.
-func DetectProjectName() (string, error) {
-	if cfg, _, err := config.FindAndLoad(); err == nil && cfg != nil {
-		if cfg.ProjectName != "" {
-			return cfg.ProjectName, nil
-		}
-	}
-
-	return project.DetectProject()
-}
-
-func init() {
-	rootCmd.AddCommand(startCmd)
 }

@@ -1,9 +1,10 @@
-package cmd
+package entries
 
 import (
 	"fmt"
 	"os"
 
+	"github.com/DylanDevelops/tmpo/internal/project"
 	"github.com/DylanDevelops/tmpo/internal/storage"
 	"github.com/DylanDevelops/tmpo/internal/ui"
 	"github.com/manifoldco/promptui"
@@ -59,7 +60,7 @@ var deleteCmd = &cobra.Command{
 			projectName = selectedProject
 		} else {
 			// Use current project
-			detectedProject, err := DetectProjectName()
+			detectedProject, err := project.DetectConfiguredProject()
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("detecting project: %v", err))
 				os.Exit(1)

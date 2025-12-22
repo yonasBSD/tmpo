@@ -1,4 +1,4 @@
-package cmd
+package history
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package cmd
+package tracking
 
 import (
 	"fmt"
@@ -64,8 +64,4 @@ var resumeCmd = &cobra.Command{
 
 		ui.NewlineBelow()
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(resumeCmd)
 }

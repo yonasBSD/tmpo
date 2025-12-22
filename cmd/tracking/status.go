@@ -1,4 +1,4 @@
-package cmd
+package tracking
 
 import (
 	"fmt"
@@ -52,8 +52,4 @@ var statusCmd = &cobra.Command{
 
 		ui.NewlineBelow()
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(statusCmd)
 }
