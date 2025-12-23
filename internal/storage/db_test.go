@@ -477,49 +477,49 @@ func TestTimeEntryIsRunning(t *testing.T) {
 	}
 }
 
-func TestTimeEntryRoundedDuration(t *testing.T) {
+func TestTimeEntryRoundedHours(t *testing.T) {
 	tests := []struct {
 		name     string
 		entry    *TimeEntry
-		expected time.Duration
+		expected float64
 	}{
 		{
-			name: "rounds up when seconds >= 30",
+			name: "1h 49m 46s rounds to 1.83 hours",
 			entry: &TimeEntry{
 				StartTime: time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC),
 				EndTime:   timePtr(time.Date(2024, 1, 1, 11, 49, 46, 0, time.UTC)),
 			},
-			expected: 110 * time.Minute, // 1h 49m 46s rounds to 1h 50m
+			expected: 1.83,
 		},
 		{
-			name: "rounds down when seconds < 30",
-			entry: &TimeEntry{
-				StartTime: time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC),
-				EndTime:   timePtr(time.Date(2024, 1, 1, 11, 49, 15, 0, time.UTC)),
-			},
-			expected: 109 * time.Minute, // 1h 49m 15s rounds to 1h 49m
-		},
-		{
-			name: "exact minutes remains unchanged",
+			name: "2h 30m 0s rounds to 2.50 hours",
 			entry: &TimeEntry{
 				StartTime: time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC),
 				EndTime:   timePtr(time.Date(2024, 1, 1, 12, 30, 0, 0, time.UTC)),
 			},
-			expected: 150 * time.Minute, // 2h 30m stays as 2h 30m
+			expected: 2.50,
 		},
 		{
-			name: "30 seconds rounds up",
+			name: "0h 5m 30s rounds to 0.09 hours",
 			entry: &TimeEntry{
 				StartTime: time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC),
 				EndTime:   timePtr(time.Date(2024, 1, 1, 10, 5, 30, 0, time.UTC)),
 			},
-			expected: 6 * time.Minute, // 5m 30s rounds to 6m
+			expected: 0.09,
+		},
+		{
+			name: "3h 14m 56s rounds to 3.25 hours",
+			entry: &TimeEntry{
+				StartTime: time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC),
+				EndTime:   timePtr(time.Date(2024, 1, 1, 13, 14, 56, 0, time.UTC)),
+			},
+			expected: 3.25,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.entry.RoundedDuration())
+			assert.Equal(t, tt.expected, tt.entry.RoundedHours())
 		})
 	}
 }

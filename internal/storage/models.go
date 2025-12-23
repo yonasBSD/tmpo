@@ -1,6 +1,9 @@
 package storage
 
-import "time"
+import (
+	"math"
+	"time"
+)
 
 // TimeEntry represents a recorded period of work on a project.
 // It includes a unique identifier, the project name, the start time,
@@ -33,11 +36,14 @@ func (t *TimeEntry) IsRunning() bool {
 	return t.EndTime == nil
 }
 
-// RoundedDuration returns the duration rounded to the nearest minute.
-// This is useful for financial calculations where invoicing is typically done
-// in minute increments rather than to the second or millisecond.
-func (t *TimeEntry) RoundedDuration() time.Duration {
-	duration := t.Duration()
-	minutes := duration.Round(time.Minute)
-	return minutes
+// RoundedHours returns the duration in hours rounded to 2 decimal places.
+// This rounding is used for earnings calculations to ensure transparency:
+// the displayed hours value (e.g., "1.83 hours") matches exactly what is
+// used in billing calculations.
+//
+// Future enhancement: This could be made configurable via user settings
+// to support different rounding increments (e.g., 0.1 hours for 6-minute billing,
+// or 0.25 hours for 15-minute billing).
+func (t *TimeEntry) RoundedHours() float64 {
+	return math.Round(t.Duration().Hours()*100) / 100
 }
