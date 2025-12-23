@@ -259,7 +259,6 @@ func EditCmd() *cobra.Command {
 
 			hasChanges := false
 
-			// Truncate to minute precision for comparison since parseDateTime only parses to the minute
 			selectedStartTrunc := selectedEntry.StartTime.Truncate(time.Minute)
 			editedStartTrunc := editedEntry.StartTime.Truncate(time.Minute)
 
