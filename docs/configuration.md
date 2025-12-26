@@ -14,6 +14,9 @@ All time tracking data and configuration is stored locally on your machine:
 
 Your data never leaves your machine. Both files can be backed up, copied, or version controlled if desired.
 
+> [!NOTE]
+> **Contributors**, when developing tmpo with `TMPO_DEV=1` or `TMPO_DEV=true`, both files are stored in `~/.tmpo-dev/` instead to keep development work separate from your production data.
+
 ## Global Configuration
 
 ### The `tmpo config` Command
@@ -64,11 +67,13 @@ See the [full currency code list](https://en.wikipedia.org/wiki/ISO_4217#Active_
 Choose how dates and times are displayed in logs, stats, and entry details:
 
 **Date Formats:**
+
 - `MM/DD/YYYY` - US format (01/15/2024)
 - `DD/MM/YYYY` - European format (15/01/2024)
 - `YYYY-MM-DD` - ISO format (2024-01-15)
 
 **Time Formats:**
+
 - `24-hour` - Military time (14:30, 23:45)
 - `12-hour (AM/PM)` - Standard time (2:30 PM, 11:45 PM)
 

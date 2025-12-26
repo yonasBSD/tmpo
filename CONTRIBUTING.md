@@ -51,10 +51,14 @@ export TMPO_DEV=1
 ./tmpo stop
 ```
 
-**Database Locations:**
+**Data Locations:**
 
-- **Production mode** (default): `~/.tmpo/tmpo.db`
-- **Development mode** (`TMPO_DEV=1`): `~/.tmpo-dev/tmpo.db`
+- **Production mode** (default):
+  - Database: `~/.tmpo/tmpo.db`
+  - Global config: `~/.tmpo/config.yaml`
+- **Development mode** (`TMPO_DEV=1`):
+  - Database: `~/.tmpo-dev/tmpo.db`
+  - Global config: `~/.tmpo-dev/config.yaml`
 
 > [!NOTE]
 > The `export TMPO_DEV=1` command only applies to your **current terminal session**. When you close the terminal, it resets to production mode. This is intentional for safety - you must explicitly enable dev mode each time.
@@ -75,9 +79,9 @@ Then restart your terminal or run `source ~/.zshrc` (or `source ~/.bashrc`).
 
 **Benefits of development mode:**
 
-- Your real time tracking data stays safe
-- You can test database changes without risk
-- You can easily clean up test data (`rm -rf ~/.tmpo-dev/`)
+- Your real time tracking data and settings stay safe
+- You can test database and config changes without risk
+- You can easily clean up test data and config (`rm -rf ~/.tmpo-dev/`)
 
 ### Building with Version Information
 
@@ -122,7 +126,7 @@ goreleaser build --snapshot --clean
 
 ```
 tmpo/
-├── cmd/                 # CLI commands (Using Cobra)
+├── cmd/                # CLI commands (Using Cobra)
 │   ├── root.go         # Root command with RootCmd() constructor
 │   ├── tracking/       # Time tracking commands (start, stop, pause, resume, status)
 │   ├── entries/        # Entry management (edit, delete, manual)
@@ -130,7 +134,7 @@ tmpo/
 │   ├── setup/          # Setup commands (init)
 │   └── utilities/      # Utility commands (version)
 ├── internal/
-│   ├── config/         # Configuration management (.tmporc files)
+│   ├── settings/       # Configuration management (.tmporc and global config)
 │   ├── storage/        # SQLite database layer
 │   ├── project/        # Project detection logic
 │   ├── export/         # Export functionality
@@ -150,7 +154,8 @@ tmpo/
   - **`cmd/history/`**: History and reporting commands (log, stats, export)
   - **`cmd/setup/`**: Setup and initialization commands (init)
   - **`cmd/utilities/`**: Utility commands and version information (version)
-- **`internal/config/`**: Handles `.tmporc` file parsing and configuration
+  - **`cmd/config/`**: Global configuration command (config/settings/preferences)
+- **`internal/settings/`**: Configuration management (`.tmporc` files and global `config.yaml`)
 - **`internal/storage/`**: SQLite database operations and models
 - **`internal/project/`**: Project name detection logic (git/directory/config)
 - **`internal/export/`**: Export functionality (CSV, JSON)
@@ -163,10 +168,12 @@ All user data is stored locally in:
 
 ```
 ~/.tmpo/              # Production (default)
-  └── tmpo.db
+  ├── tmpo.db         # SQLite database
+  └── config.yaml     # Global configuration (optional)
 
 ~/.tmpo-dev/          # Development (when TMPO_DEV=1)
-  └── tmpo.db
+  ├── tmpo.db         # SQLite database
+  └── config.yaml     # Global configuration (optional)
 ```
 
 The database schema includes:
