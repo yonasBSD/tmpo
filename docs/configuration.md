@@ -64,13 +64,16 @@ See the [full currency code list](https://en.wikipedia.org/wiki/ISO_4217#Active_
 
 #### Date & Time Formats
 
-Choose how dates and times are displayed in logs, stats, and entry details:
+Choose how dates and times are displayed and entered throughout tmpo:
 
 **Date Formats:**
 
 - `MM/DD/YYYY` - US format (01/15/2024)
 - `DD/MM/YYYY` - European format (15/01/2024)
 - `YYYY-MM-DD` - ISO format (2024-01-15)
+
+> [!NOTE]
+> Your date format setting affects both display output (in logs, stats, etc.) and input prompts (when using `tmpo manual` or `tmpo edit`). The prompts will show and accept dates in your configured format.
 
 **Time Formats:**
 

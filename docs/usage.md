@@ -273,11 +273,14 @@ Create manual time entries for past work using an interactive prompt.
 tmpo manual
 # Prompts for:
 # - Project name
-# - Start date and time
-# - End date and time
+# - Start date and time (date format follows your config setting)
+# - End date and time (date format follows your config setting)
 # - Description
 # - Milestone (optional, if milestones exist for the project)
 ```
+
+> [!NOTE]
+> Date input format adapts to your configured date format (`tmpo config`). For example, if you've set DD/MM/YYYY format, enter dates as "25-12-2024" rather than "12-25-2024".
 
 This is useful for:
 
@@ -304,8 +307,8 @@ tmpo edit --show-all-projects    # Select project first, then entry
 **Interactive Flow:**
 
 1. Select an entry from the list (shows completed entries only)
-2. Edit start date and time (press Enter to keep current value)
-3. Edit end date and time (press Enter to keep current value)
+2. Edit start date and time (dates use your configured format - press Enter to keep current value)
+3. Edit end date and time (dates use your configured format - press Enter to keep current value)
 4. Edit description (press Enter to keep current value)
 5. Review your changes with a diff view
 6. Confirm to save or discard changes

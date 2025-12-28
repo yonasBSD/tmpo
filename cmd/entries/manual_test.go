@@ -52,7 +52,7 @@ func TestValidateDate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateDate(tt.input)
+			err := validateDate(tt.input, "01-02-2006", "MM-DD-YYYY")
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -193,7 +193,7 @@ func TestValidateEndDateTime(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateEndDateTime(tt.startDate, tt.startTime, tt.endDate, tt.endTime)
+			err := validateEndDateTime(tt.startDate, tt.startTime, tt.endDate, tt.endTime, "01-02-2006")
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -264,7 +264,7 @@ func TestParseDateTime(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := parseDateTime(tt.date, tt.timeStr)
+			result, err := parseDateTime(tt.date, tt.timeStr, "01-02-2006")
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
