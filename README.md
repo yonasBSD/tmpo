@@ -4,7 +4,7 @@
 
 ![screenshot of tmpo start and tmpo stats](https://github.com/user-attachments/assets/ce6c684e-04a6-48d0-a6b9-77349d1b3ec8)
 
-**tmpo** allows you to track time effortlessly with simple commands that live in your terminal. Track time with automatic project detection, view stats, and export data; all without leaving your workspace.
+**tmpo** allows you to track time effortlessly with simple commands that live in your terminal. Track time with automatic project detection, organize work into milestones, view stats, and export data; all without leaving your workspace.
 
 ## About
 
@@ -14,6 +14,7 @@
 
 - **🚀 Fast & Lightweight** - Built in Go, tmpo starts instantly and uses minimal resources
 - **🎯 Automatic Project Detection** - Detects project names from Git repos or `.tmporc` configuration files
+- **🎯 Milestone Tracking** - Organize time entries into sprints, releases, or project phases
 - **💾 Local & Private Storage** - All data stored locally in SQLite - your time tracking stays private
 - **📊 Rich Reporting** - View stats, export to CSV/JSON, and track hourly rates
 - **⚡ Zero Configuration Needed** - Works out of the box, configure only when you need to
@@ -52,6 +53,9 @@ tmpo stop
 
 # View statistics
 tmpo stats
+
+# Organize work into milestones
+tmpo milestone start "Sprint 1"
 ```
 
 For detailed usage and all commands, see the [Usage Guide](docs/usage.md).
@@ -67,6 +71,7 @@ tmpo config
 ```
 
 This opens an interactive wizard to configure:
+
 - Currency (USD, EUR, GBP, JPY, and 30+ more)
 - Date format (MM/DD/YYYY, DD/MM/YYYY, or YYYY-MM-DD)
 - Time format (24-hour or 12-hour)

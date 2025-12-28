@@ -10,19 +10,22 @@ import (
 
 // ExportEntry represents a single time-tracking record prepared for JSON export.
 // It contains the project name, the start timestamp, an optional end timestamp,
-// the duration expressed in hours, and an optional human-readable description.
+// the duration expressed in hours, an optional human-readable description, and
+// an optional milestone name.
 //
 // Project is the associated project identifier or name.
 // StartTime is the entry start timestamp as a string (for example, RFC3339).
 // EndTime is the optional end timestamp; it will be omitted from JSON when empty.
 // Duration is the total duration of the entry in hours as a floating-point value.
 // Description is an optional text note; it will be omitted from JSON when empty.
+// Milestone is the optional milestone name; it will be omitted from JSON when empty.
 type ExportEntry struct {
-	Project string `json:"project"`
-	StartTime string `json:"start_time"`
-	EndTime string `json:"end_time,omitempty"`
-	Duration float64 `json:"duration_hours"`
-	Description string `json:"description,omitempty"`
+	Project     string  `json:"project"`
+	StartTime   string  `json:"start_time"`
+	EndTime     string  `json:"end_time,omitempty"`
+	Duration    float64 `json:"duration_hours"`
+	Description string  `json:"description,omitempty"`
+	Milestone   string  `json:"milestone,omitempty"`
 }
 
 // ToJson writes the given time entries to filename in pretty-printed JSON.
@@ -42,14 +45,18 @@ func ToJson(entries []*storage.TimeEntry, filename string) error {
 
 	for _, entry := range entries {
 		export := ExportEntry{
-			Project: entry.ProjectName,
-			StartTime: entry.StartTime.Format("2006-01-02T15:04:05Z07:00"),
-			Duration: entry.Duration().Hours(),
+			Project:     entry.ProjectName,
+			StartTime:   entry.StartTime.Format("2006-01-02T15:04:05Z07:00"),
+			Duration:    entry.Duration().Hours(),
 			Description: entry.Description,
 		}
 
 		if entry.EndTime != nil {
 			export.EndTime = entry.EndTime.Format("2006-01-02T15:04:05Z07:00")
+		}
+
+		if entry.MilestoneName != nil {
+			export.Milestone = *entry.MilestoneName
 		}
 
 		exportEntries = append(exportEntries, export)

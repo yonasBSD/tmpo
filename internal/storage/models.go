@@ -8,8 +8,9 @@ import (
 // TimeEntry represents a recorded period of work on a project.
 // It includes a unique identifier, the project name, the start time,
 // an optional end time (nil indicates the entry is still in progress),
-// a free-form description of the work performed, and an optional hourly rate
-// (nil indicates no rate was configured when the entry was created).
+// a free-form description of the work performed, an optional hourly rate
+// (nil indicates no rate was configured when the entry was created), and
+// an optional milestone name (nil indicates the entry is not part of any milestone).
 type TimeEntry struct {
 	ID int64
 	ProjectName string
@@ -17,6 +18,7 @@ type TimeEntry struct {
 	EndTime *time.Time
 	Description string
 	HourlyRate *float64
+	MilestoneName *string
 }
 
 // Duration returns the elapsed time for the TimeEntry.
@@ -46,4 +48,32 @@ func (t *TimeEntry) IsRunning() bool {
 // or 0.25 hours for 15-minute billing).
 func (t *TimeEntry) RoundedHours() float64 {
 	return math.Round(t.Duration().Hours()*100) / 100
+}
+
+// Milestone represents a time-boxed period for grouping time entries.
+// It includes a unique identifier, the project name it belongs to, the milestone name,
+// the start time when it was created, and an optional end time (nil indicates the
+// milestone is still active).
+type Milestone struct {
+	ID          int64
+	ProjectName string
+	Name        string
+	StartTime   time.Time
+	EndTime     *time.Time
+}
+
+// IsActive reports whether the Milestone is currently active.
+// It returns true when EndTime is nil, indicating no end timestamp has been set.
+func (m *Milestone) IsActive() bool {
+	return m.EndTime == nil
+}
+
+// Duration returns the elapsed time for the Milestone.
+// If EndTime is non-nil, it returns the difference EndTime.Sub(StartTime).
+// If EndTime is nil (the milestone is ongoing), it returns time.Since(StartTime).
+func (m *Milestone) Duration() time.Duration {
+	if m.EndTime == nil {
+		return time.Since(m.StartTime)
+	}
+	return m.EndTime.Sub(m.StartTime)
 }
