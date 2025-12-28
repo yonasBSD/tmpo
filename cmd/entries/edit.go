@@ -26,6 +26,16 @@ func EditCmd() *cobra.Command {
 			ui.PrintSuccess("✏️", "Edit Time Entry")
 			fmt.Println()
 
+			// Load global config to get date format preference
+			globalCfg, err := settings.LoadGlobalConfig()
+			if err != nil {
+				ui.PrintError(ui.EmojiError, fmt.Sprintf("loading config: %v", err))
+				os.Exit(1)
+			}
+
+			// Get date format for prompts and validation
+			dateFormatDisplay, dateFormatLayout := getDateFormatInfo(globalCfg.DateFormat)
+
 			db, err := storage.Initialize()
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
@@ -134,8 +144,8 @@ func EditCmd() *cobra.Command {
 			// Edit start date
 			currentStartDate := settings.FormatDateDashed(selectedEntry.StartTime)
 			startDatePrompt := promptui.Prompt{
-				Label:     fmt.Sprintf("Start date: (%s)", currentStartDate),
-				Validate:  validateDateOptional,
+				Label:     fmt.Sprintf("Start date (%s): (%s)", dateFormatDisplay, currentStartDate),
+				Validate:  func(input string) error { return validateDateOptional(input, dateFormatLayout, dateFormatDisplay) },
 				AllowEdit: true,
 			}
 
@@ -172,8 +182,8 @@ func EditCmd() *cobra.Command {
 			// Edit end date
 			currentEndDate := settings.FormatDateDashed(*selectedEntry.EndTime)
 			endDatePrompt := promptui.Prompt{
-				Label:     fmt.Sprintf("End date: (%s)", currentEndDate),
-				Validate:  validateDateOptional,
+				Label:     fmt.Sprintf("End date (%s): (%s)", dateFormatDisplay, currentEndDate),
+				Validate:  func(input string) error { return validateDateOptional(input, dateFormatLayout, dateFormatDisplay) },
 				AllowEdit: true,
 			}
 
@@ -208,7 +218,7 @@ func EditCmd() *cobra.Command {
 			}
 
 			// Validate that end is after start
-			if err := validateEndDateTime(startDateInput, startTimeInput, endDateInput, endTimeInput); err != nil {
+			if err := validateEndDateTime(startDateInput, startTimeInput, endDateInput, endTimeInput, dateFormatLayout); err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
 				os.Exit(1)
 			}
@@ -236,13 +246,13 @@ func EditCmd() *cobra.Command {
 			}
 
 			// Parse the new times
-			newStartTime, err := parseDateTime(startDateInput, startTimeInput)
+			newStartTime, err := parseDateTime(startDateInput, startTimeInput, dateFormatLayout)
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("parsing start time: %v", err))
 				os.Exit(1)
 			}
 
-			newEndTime, err := parseDateTime(endDateInput, endTimeInput)
+			newEndTime, err := parseDateTime(endDateInput, endTimeInput, dateFormatLayout)
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("parsing end time: %v", err))
 				os.Exit(1)
@@ -347,11 +357,11 @@ func formatEntryLabel(entry *storage.TimeEntry) string {
 // validateDateOptional validates date input for edit mode, allowing empty input
 // Empty input is valid (indicates keeping current value)
 // Non-empty input is validated using the same rules as validateDate
-func validateDateOptional(input string) error {
+func validateDateOptional(input, layout, displayFormat string) error {
 	if input == "" {
 		return nil
 	}
-	return validateDate(input)
+	return validateDate(input, layout, displayFormat)
 }
 
 // validateTimeOptional validates time input for edit mode, allowing empty input

@@ -6,14 +6,31 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DylanDevelops/tmpo/internal/settings"
 	"github.com/DylanDevelops/tmpo/internal/currency"
 	"github.com/DylanDevelops/tmpo/internal/project"
+	"github.com/DylanDevelops/tmpo/internal/settings"
 	"github.com/DylanDevelops/tmpo/internal/storage"
 	"github.com/DylanDevelops/tmpo/internal/ui"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
+
+// getDateFormatInfo returns the display format and Go time layout for the given date format configuration.
+// It converts the user-facing format (e.g., "MM/DD/YYYY") to both a display format with dashes
+// (e.g., "MM-DD-YYYY") and the corresponding Go time layout (e.g., "01-02-2006").
+func getDateFormatInfo(configFormat string) (displayFormat, layout string) {
+	switch configFormat {
+	case "MM/DD/YYYY":
+		return "MM-DD-YYYY", "01-02-2006"
+	case "DD/MM/YYYY":
+		return "DD-MM-YYYY", "02-01-2006"
+	case "YYYY-MM-DD":
+		return "YYYY-MM-DD", "2006-01-02"
+	default:
+		// Default to MM-DD-YYYY
+		return "MM-DD-YYYY", "01-02-2006"
+	}
+}
 
 func ManualCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -24,6 +41,16 @@ func ManualCmd() *cobra.Command {
 			ui.NewlineAbove()
 			ui.PrintSuccess(ui.EmojiManual, "Create Manual Time Entry")
 			fmt.Println()
+
+			// Load global config to get date format preference
+			globalCfg, err := settings.LoadGlobalConfig()
+			if err != nil {
+				ui.PrintError(ui.EmojiError, fmt.Sprintf("loading config: %v", err))
+				os.Exit(1)
+			}
+
+			// Get date format for prompts and validation
+			dateFormatDisplay, dateFormatLayout := getDateFormatInfo(globalCfg.DateFormat)
 
 			defaultProject := detectProjectNameWithSource()
 
@@ -56,8 +83,8 @@ func ManualCmd() *cobra.Command {
 			}
 
 			startDatePrompt := promptui.Prompt{
-				Label:    "Start date (MM-DD-YYYY)",
-				Validate: validateDate,
+				Label:    fmt.Sprintf("Start date (%s)", dateFormatDisplay),
+				Validate: func(input string) error { return validateDate(input, dateFormatLayout, dateFormatDisplay) },
 			}
 
 			startDateInput, err := startDatePrompt.Run()
@@ -77,7 +104,7 @@ func ManualCmd() *cobra.Command {
 				os.Exit(1)
 			}
 
-			endDateLabel := fmt.Sprintf("End date (MM-DD-YYYY): (%s)", startDateInput)
+			endDateLabel := fmt.Sprintf("End date (%s): (%s)", dateFormatDisplay, startDateInput)
 
 			endDatePrompt := promptui.Prompt{
 				Label:     endDateLabel,
@@ -95,7 +122,7 @@ func ManualCmd() *cobra.Command {
 				endDateInput = startDateInput
 			}
 
-			if err := validateDate(endDateInput); err != nil {
+			if err := validateDate(endDateInput, dateFormatLayout, dateFormatDisplay); err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
 				os.Exit(1)
 			}
@@ -111,7 +138,7 @@ func ManualCmd() *cobra.Command {
 				os.Exit(1)
 			}
 
-			if err := validateEndDateTime(startDateInput, startTimeStr, endDateInput, endTimeStr); err != nil {
+			if err := validateEndDateTime(startDateInput, startTimeStr, endDateInput, endTimeStr, dateFormatLayout); err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
 				os.Exit(1)
 			}
@@ -126,13 +153,13 @@ func ManualCmd() *cobra.Command {
 				os.Exit(1)
 			}
 
-			startTime, err := parseDateTime(startDateInput, startTimeStr)
+			startTime, err := parseDateTime(startDateInput, startTimeStr, dateFormatLayout)
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("parsing start time: %v", err))
 				os.Exit(1)
 			}
 
-			endTime, err := parseDateTime(endDateInput, endTimeStr)
+			endTime, err := parseDateTime(endDateInput, endTimeStr, dateFormatLayout)
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("parsing end time: %v", err))
 				os.Exit(1)
@@ -186,18 +213,18 @@ func ManualCmd() *cobra.Command {
 	return cmd
 }
 
-// validateDate validates that the provided input is a non-empty date string in MM-DD-YYYY format.
-// It attempts to parse the input using the layout "01-02-2006" and returns an error if parsing fails.
+// validateDate validates that the provided input is a non-empty date string in the specified format.
+// It attempts to parse the input using the provided layout and returns an error if parsing fails.
 // It also rejects dates that are more than 24 hours in the future (i.e., strictly after time.Now().Add(24*time.Hour)).
 // Returns nil if the input is valid.
-func validateDate(input string) error {
+func validateDate(input, layout, displayFormat string) error {
 	if input == "" {
 		return fmt.Errorf("date cannot be empty")
 	}
 
-	date, err := time.Parse("01-02-2006", input)
+	date, err := time.Parse(layout, input)
 	if err != nil {
-		return fmt.Errorf("invalid date format, use MM-DD-YYYY")
+		return fmt.Errorf("invalid date format, use %s", displayFormat)
 	}
 
 	if date.After(time.Now().Add(24 * time.Hour)) {
@@ -243,13 +270,13 @@ func validateTime(input string) error {
 // wrapping the parse error (prefixed with "invalid start datetime" or
 // "invalid end datetime"). If the end is not after the start, it
 // returns an error stating that the end time must be after the start time.
-func validateEndDateTime(startDate, startTime, endDate, endTime string) error {
-	start, err := parseDateTime(startDate, startTime)
+func validateEndDateTime(startDate, startTime, endDate, endTime, dateLayout string) error {
+	start, err := parseDateTime(startDate, startTime, dateLayout)
 	if err != nil {
 		return fmt.Errorf("invalid start datetime: %w", err)
 	}
 
-	end, err := parseDateTime(endDate, endTime)
+	end, err := parseDateTime(endDate, endTime, dateLayout)
 	if err != nil {
 		return fmt.Errorf("invalid end datetime: %w", err)
 	}
@@ -262,20 +289,20 @@ func validateEndDateTime(startDate, startTime, endDate, endTime string) error {
 }
 
 // parseDateTime combines date and time strings into time.Time
-// Expects date in MM-DD-YYYY format and time in either 12-hour (with AM/PM) or 24-hour format
-func parseDateTime(date, timeStr string) (time.Time, error) {
+// Expects date in the specified format and time in either 12-hour (with AM/PM) or 24-hour format
+func parseDateTime(date, timeStr, dateLayout string) (time.Time, error) {
 	normalizedTime := normalizeAMPM(timeStr)
 	dateTime := fmt.Sprintf("%s %s", date, normalizedTime)
 
-	if dt, err := time.ParseInLocation("01-02-2006 3:04 PM", dateTime, time.Local); err == nil {
+	if dt, err := time.ParseInLocation(dateLayout + " 3:04 PM", dateTime, time.Local); err == nil {
 		return dt, nil
 	}
 
-	if dt, err := time.ParseInLocation("01-02-2006 03:04 PM", dateTime, time.Local); err == nil {
+	if dt, err := time.ParseInLocation(dateLayout + " 03:04 PM", dateTime, time.Local); err == nil {
 		return dt, nil
 	}
 
-	return time.ParseInLocation("01-02-2006 15:04", dateTime, time.Local)
+	return time.ParseInLocation(dateLayout + " 15:04", dateTime, time.Local)
 }
 
 // normalizeAMPM converts lowercase am/pm to uppercase AM/PM
