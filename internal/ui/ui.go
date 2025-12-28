@@ -32,18 +32,19 @@ const (
 
 // Emoji Constants
 const (
-	EmojiStart   = "✨"
-	EmojiStop    = "🛑"
-	EmojiStatus  = "⏱️"
-	EmojiStats   = "📊"
-	EmojiLog     = "📝"
-	EmojiManual  = "✍️"
-	EmojiInit    = "⚙️"
-	EmojiExport  = "📤"
-	EmojiSuccess = "✅"
-	EmojiError   = "❌"
-	EmojiWarning = "⚠️"
-	EmojiInfo    = "ℹ️"
+	EmojiStart     = "✨"
+	EmojiStop      = "🛑"
+	EmojiStatus    = "⏱️"
+	EmojiStats     = "📊"
+	EmojiLog       = "📝"
+	EmojiManual    = "✍️"
+	EmojiInit      = "⚙️"
+	EmojiExport    = "📤"
+	EmojiMilestone = "🎯"
+	EmojiSuccess   = "✅"
+	EmojiError     = "❌"
+	EmojiWarning   = "⚠️"
+	EmojiInfo      = "ℹ️"
 )
 
 // Success colored output functions that returns colored string

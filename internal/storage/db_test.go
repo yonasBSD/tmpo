@@ -21,7 +21,20 @@ func setupTestDB(t *testing.T) *Database {
 			start_time DATETIME NOT NULL,
 			end_time DATETIME,
 			description TEXT,
-			hourly_rate REAL
+			hourly_rate REAL,
+			milestone_name TEXT
+		)
+	`)
+	assert.NoError(t, err)
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS milestones (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			project_name TEXT NOT NULL,
+			name TEXT NOT NULL,
+			start_time DATETIME NOT NULL,
+			end_time DATETIME,
+			UNIQUE(project_name, name)
 		)
 	`)
 	assert.NoError(t, err)
@@ -61,7 +74,7 @@ func TestCreateEntry(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			entry, err := db.CreateEntry(tt.projectName, tt.description, tt.hourlyRate)
+			entry, err := db.CreateEntry(tt.projectName, tt.description, tt.hourlyRate, nil)
 
 			assert.NoError(t, err)
 			assert.NotNil(t, entry)
@@ -88,7 +101,7 @@ func TestCreateManualEntry(t *testing.T) {
 	endTime := time.Now().Add(-1 * time.Hour)
 	rate := 100.0
 
-	entry, err := db.CreateManualEntry("manual-project", "manual work", startTime, endTime, &rate)
+	entry, err := db.CreateManualEntry("manual-project", "manual work", startTime, endTime, &rate, nil)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, entry)
@@ -110,7 +123,7 @@ func TestGetRunningEntry(t *testing.T) {
 	assert.Nil(t, running)
 
 	// Create a running entry
-	entry, err := db.CreateEntry("test-project", "test", nil)
+	entry, err := db.CreateEntry("test-project", "test", nil, nil)
 	assert.NoError(t, err)
 
 	// Should return the running entry
@@ -140,7 +153,7 @@ func TestGetLastStoppedEntry(t *testing.T) {
 	assert.Nil(t, stopped)
 
 	// Create and stop first entry
-	entry1, err := db.CreateEntry("project-1", "first task", nil)
+	entry1, err := db.CreateEntry("project-1", "first task", nil, nil)
 	assert.NoError(t, err)
 	time.Sleep(10 * time.Millisecond)
 	err = db.StopEntry(entry1.ID)
@@ -155,7 +168,7 @@ func TestGetLastStoppedEntry(t *testing.T) {
 
 	// Create and stop second entry (more recent)
 	time.Sleep(10 * time.Millisecond)
-	entry2, err := db.CreateEntry("project-2", "second task", nil)
+	entry2, err := db.CreateEntry("project-2", "second task", nil, nil)
 	assert.NoError(t, err)
 	time.Sleep(10 * time.Millisecond)
 	err = db.StopEntry(entry2.ID)
@@ -170,7 +183,7 @@ func TestGetLastStoppedEntry(t *testing.T) {
 	assert.Equal(t, "second task", stopped.Description)
 
 	// Create a running entry
-	entry3, err := db.CreateEntry("project-3", "running task", nil)
+	entry3, err := db.CreateEntry("project-3", "running task", nil, nil)
 	assert.NoError(t, err)
 
 	// Should still return entry2, not the running entry3
@@ -185,7 +198,7 @@ func TestStopEntry(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	entry, err := db.CreateEntry("test-project", "test", nil)
+	entry, err := db.CreateEntry("test-project", "test", nil, nil)
 	assert.NoError(t, err)
 	assert.Nil(t, entry.EndTime)
 
@@ -203,7 +216,7 @@ func TestGetEntry(t *testing.T) {
 	defer db.Close()
 
 	rate := 75.5
-	created, err := db.CreateEntry("test-project", "test description", &rate)
+	created, err := db.CreateEntry("test-project", "test description", &rate, nil)
 	assert.NoError(t, err)
 
 	// Get the entry
@@ -226,7 +239,7 @@ func TestGetEntries(t *testing.T) {
 
 	// Create multiple entries
 	for i := 0; i < 5; i++ {
-		_, err := db.CreateEntry("test-project", "", nil)
+		_, err := db.CreateEntry("test-project", "", nil, nil)
 		assert.NoError(t, err)
 		time.Sleep(10 * time.Millisecond) // Ensure different timestamps
 	}
@@ -252,11 +265,11 @@ func TestGetEntriesByProject(t *testing.T) {
 	defer db.Close()
 
 	// Create entries for different projects
-	_, err := db.CreateEntry("project-a", "task 1", nil)
+	_, err := db.CreateEntry("project-a", "task 1", nil, nil)
 	assert.NoError(t, err)
-	_, err = db.CreateEntry("project-b", "task 2", nil)
+	_, err = db.CreateEntry("project-b", "task 2", nil, nil)
 	assert.NoError(t, err)
-	_, err = db.CreateEntry("project-a", "task 3", nil)
+	_, err = db.CreateEntry("project-a", "task 3", nil, nil)
 	assert.NoError(t, err)
 
 	// Get entries for project-a
@@ -288,11 +301,11 @@ func TestGetEntriesByDateRange(t *testing.T) {
 	twoDaysAgo := now.Add(-48 * time.Hour)
 
 	// Create entries with different start times
-	_, err := db.CreateManualEntry("project", "old", twoDaysAgo, twoDaysAgo.Add(1*time.Hour), nil)
+	_, err := db.CreateManualEntry("project", "old", twoDaysAgo, twoDaysAgo.Add(1*time.Hour), nil, nil)
 	assert.NoError(t, err)
-	_, err = db.CreateManualEntry("project", "recent", yesterday, yesterday.Add(1*time.Hour), nil)
+	_, err = db.CreateManualEntry("project", "recent", yesterday, yesterday.Add(1*time.Hour), nil, nil)
 	assert.NoError(t, err)
-	_, err = db.CreateManualEntry("project", "today", now.Add(-1*time.Hour), now, nil)
+	_, err = db.CreateManualEntry("project", "today", now.Add(-1*time.Hour), now, nil, nil)
 	assert.NoError(t, err)
 
 	// Get entries from yesterday onwards
@@ -311,11 +324,11 @@ func TestGetAllProjects(t *testing.T) {
 	assert.Len(t, projects, 0)
 
 	// Create entries for different projects
-	_, err = db.CreateEntry("zebra-project", "", nil)
+	_, err = db.CreateEntry("zebra-project", "", nil, nil)
 	assert.NoError(t, err)
-	_, err = db.CreateEntry("alpha-project", "", nil)
+	_, err = db.CreateEntry("alpha-project", "", nil, nil)
 	assert.NoError(t, err)
-	_, err = db.CreateEntry("zebra-project", "", nil) // Duplicate
+	_, err = db.CreateEntry("zebra-project", "", nil, nil) // Duplicate
 	assert.NoError(t, err)
 
 	// Get all projects
@@ -333,11 +346,11 @@ func TestGetProjectsWithCompletedEntries(t *testing.T) {
 	defer db.Close()
 
 	// Create running entry
-	_, err := db.CreateEntry("running-project", "", nil)
+	_, err := db.CreateEntry("running-project", "", nil, nil)
 	assert.NoError(t, err)
 
 	// Create completed entry
-	entry, err := db.CreateEntry("completed-project", "", nil)
+	entry, err := db.CreateEntry("completed-project", "", nil, nil)
 	assert.NoError(t, err)
 	err = db.StopEntry(entry.ID)
 	assert.NoError(t, err)
@@ -354,18 +367,18 @@ func TestGetCompletedEntriesByProject(t *testing.T) {
 	defer db.Close()
 
 	// Create running entry
-	_, err := db.CreateEntry("test-project", "running", nil)
+	_, err := db.CreateEntry("test-project", "running", nil, nil)
 	assert.NoError(t, err)
 
 	// Create completed entries
-	entry1, err := db.CreateEntry("test-project", "completed 1", nil)
+	entry1, err := db.CreateEntry("test-project", "completed 1", nil, nil)
 	assert.NoError(t, err)
 	err = db.StopEntry(entry1.ID)
 	assert.NoError(t, err)
 
 	time.Sleep(10 * time.Millisecond)
 
-	entry2, err := db.CreateEntry("test-project", "completed 2", nil)
+	entry2, err := db.CreateEntry("test-project", "completed 2", nil, nil)
 	assert.NoError(t, err)
 	err = db.StopEntry(entry2.ID)
 	assert.NoError(t, err)
@@ -387,7 +400,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 
 	// Create an entry
 	rate := 100.0
-	entry, err := db.CreateEntry("original-project", "original description", &rate)
+	entry, err := db.CreateEntry("original-project", "original description", &rate, nil)
 	assert.NoError(t, err)
 
 	// Update the entry
@@ -420,7 +433,7 @@ func TestDeleteTimeEntry(t *testing.T) {
 	defer db.Close()
 
 	// Create an entry
-	entry, err := db.CreateEntry("test-project", "to be deleted", nil)
+	entry, err := db.CreateEntry("test-project", "to be deleted", nil, nil)
 	assert.NoError(t, err)
 
 	// Delete it

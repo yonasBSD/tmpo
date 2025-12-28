@@ -57,7 +57,15 @@ func StartCmd() *cobra.Command {
 				hourlyRate = &cfg.HourlyRate
 			}
 
-			entry, err := db.CreateEntry(projectName, description, hourlyRate)
+			// Check for active milestone
+			var milestoneName *string
+			activeMilestone, err := db.GetActiveMilestoneForProject(projectName)
+
+			if activeMilestone != nil {
+				milestoneName = &activeMilestone.Name
+			}
+
+			entry, err := db.CreateEntry(projectName, description, hourlyRate, milestoneName)
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
 				os.Exit(1)
@@ -75,6 +83,10 @@ func StartCmd() *cobra.Command {
 
 			if description != "" {
 				ui.PrintInfo(4, "Description", description)
+			}
+
+			if milestoneName != nil {
+				ui.PrintInfo(4, "Milestone", *milestoneName)
 			}
 
 			ui.NewlineBelow()

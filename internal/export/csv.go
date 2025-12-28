@@ -37,7 +37,7 @@ func ToCSV(entries []*storage.TimeEntry, filename string) error {
 
 	defer writer.Flush()
 
-	header := []string{"Project", "Start Time", "End Time", "Duration (hours)", "Description"}
+	header := []string{"Project", "Start Time", "End Time", "Duration (hours)", "Description", "Milestone"}
 	if err := writer.Write(header); err != nil {
 		return fmt.Errorf("failed to write header: %w", err)
 	}
@@ -48,6 +48,11 @@ func ToCSV(entries []*storage.TimeEntry, filename string) error {
 			endTime = entry.EndTime.Format("2006-01-02 15:04:05")
 		}
 
+		milestoneName := ""
+		if entry.MilestoneName != nil {
+			milestoneName = *entry.MilestoneName
+		}
+
 		duration := entry.Duration().Hours()
 
 		record := []string{
@@ -56,6 +61,7 @@ func ToCSV(entries []*storage.TimeEntry, filename string) error {
 			endTime,
 			fmt.Sprintf("%.2f", duration),
 			entry.Description,
+			milestoneName,
 		}
 
 		if err := writer.Write(record); err != nil {

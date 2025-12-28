@@ -150,7 +150,39 @@ func ManualCmd() *cobra.Command {
 			}
 			defer db.Close()
 
-			entry, err := db.CreateManualEntry(projectName, description, startTime, endTime, hourlyRate)
+			// Check for available milestones
+			var milestoneName *string
+			milestones, err := db.GetMilestonesByProject(projectName)
+			if err == nil && len(milestones) > 0 {
+				// Build milestone options
+				milestoneOptions := []string{"(None)"}
+				for _, m := range milestones {
+					status := "Active"
+					if !m.IsActive() {
+						status = "Finished"
+					}
+					milestoneOptions = append(milestoneOptions, fmt.Sprintf("%s (%s)", m.Name, status))
+				}
+
+				milestonePrompt := promptui.Select{
+					Label: "Assign to milestone (optional)",
+					Items: milestoneOptions,
+				}
+
+				milestoneIdx, _, err := milestonePrompt.Run()
+				if err != nil {
+					ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
+					os.Exit(1)
+				}
+
+				// If not "(None)", assign the milestone
+				if milestoneIdx > 0 {
+					selectedMilestone := milestones[milestoneIdx-1]
+					milestoneName = &selectedMilestone.Name
+				}
+			}
+
+			entry, err := db.CreateManualEntry(projectName, description, startTime, endTime, hourlyRate, milestoneName)
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
 				os.Exit(1)

@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/DylanDevelops/tmpo/internal/project"
 	"github.com/DylanDevelops/tmpo/internal/settings"
 	"github.com/DylanDevelops/tmpo/internal/storage"
 	"github.com/DylanDevelops/tmpo/internal/ui"
@@ -12,10 +13,11 @@ import (
 )
 
 var (
-	logLimit int
-	logProject string
-	logToday bool
-	logWeek bool
+	logLimit      int
+	logProject    string
+	logMilestone  string
+	logToday      bool
+	logWeek       bool
 )
 
 func LogCmd() *cobra.Command {
@@ -37,7 +39,14 @@ func LogCmd() *cobra.Command {
 
 			var entries []*storage.TimeEntry
 
-			if logToday {
+			if logMilestone != "" {
+				projectName, err := project.DetectConfiguredProject()
+				if err != nil {
+					ui.PrintError(ui.EmojiError, fmt.Sprintf("detecting project: %v", err))
+					os.Exit(1)
+				}
+				entries, err = db.GetEntriesByMilestone(projectName, logMilestone)
+			} else if logToday {
 				start := time.Now().Truncate(24 * time.Hour)
 				end := start.Add(24 * time.Hour)
 				entries, err = db.GetEntriesByDateRange(start, end)
@@ -96,6 +105,9 @@ func LogCmd() *cobra.Command {
 				}
 
 				fmt.Printf("  %s  %s  %s\n", timeRange, ui.Bold(fmt.Sprintf("%-20s", entry.ProjectName)), ui.FormatDuration(duration))
+				if entry.MilestoneName != nil {
+					fmt.Printf("    %s %s %s\n", ui.Muted("├─"), ui.Muted("Milestone:"), *entry.MilestoneName)
+				}
 				if entry.Description != "" {
 					fmt.Printf("    %s %s\n", ui.Muted("└─"), entry.Description)
 				}
@@ -111,6 +123,7 @@ func LogCmd() *cobra.Command {
 
 	cmd.Flags().IntVarP(&logLimit, "limit", "l", 10, "Number of entries to show")
 	cmd.Flags().StringVarP(&logProject, "project", "p", "", "Filter by project name")
+	cmd.Flags().StringVarP(&logMilestone, "milestone", "m", "", "Filter by milestone")
 	cmd.Flags().BoolVarP(&logToday, "today", "t", false, "Show today's entries")
 	cmd.Flags().BoolVarP(&logWeek, "week", "w", false, "Show this week's entries")
 
