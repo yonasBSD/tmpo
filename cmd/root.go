@@ -6,6 +6,7 @@ import (
 	"github.com/DylanDevelops/tmpo/cmd/config"
 	"github.com/DylanDevelops/tmpo/cmd/entries"
 	"github.com/DylanDevelops/tmpo/cmd/history"
+	"github.com/DylanDevelops/tmpo/cmd/milestones"
 	"github.com/DylanDevelops/tmpo/cmd/setup"
 	"github.com/DylanDevelops/tmpo/cmd/tracking"
 	"github.com/DylanDevelops/tmpo/cmd/utilities"
@@ -61,6 +62,9 @@ Track time effortlessly with automatic project detection and simple commands.`,
 
 	// Configuration
 	cmd.AddCommand(config.ConfigCmd())
+
+	// Milestones
+	cmd.AddCommand(milestones.MilestoneCmds())
 
 	return cmd
 }

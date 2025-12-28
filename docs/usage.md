@@ -82,12 +82,19 @@ View your time tracking history.
 **Options:**
 
 - `--limit N` - Show N most recent entries (default: 20)
+- `--milestone "name"` - Filter entries by milestone name
+- `--project "name"` - Filter entries by project name
+- `--today` - Show only today's entries
+- `--week` - Show this week's entries
 
 **Examples:**
 
 ```bash
-tmpo log             # Show recent entries
-tmpo log --limit 50  # Show more entries
+tmpo log                            # Show recent entries
+tmpo log --limit 50                 # Show more entries
+tmpo log --milestone "Sprint 1"     # Filter by milestone
+tmpo log --today                    # Show today's entries
+tmpo log --week                     # Show this week's entries
 ```
 
 ### `tmpo stats`
@@ -176,6 +183,86 @@ This creates a `.tmporc` file with:
 
 See [Configuration Guide](configuration.md) for details on the `.tmporc` file format and manual editing.
 
+## Milestone Management
+
+Milestones help you organize time entries into time-boxed periods like sprints, releases, or project phases. When a milestone is active, all new time entries are automatically tagged with it.
+
+### `tmpo milestone start [name]`
+
+Start a new milestone for the current project. All new time entries will be automatically tagged with this milestone until you finish it.
+
+**Examples:**
+
+```bash
+tmpo milestone start "Sprint 1"
+tmpo milestone start "Release 2.0"
+tmpo milestone start "Q1 Planning"
+```
+
+**Notes:**
+
+- Only one milestone can be active per project at a time
+- Starting a milestone when one is already active will show an error
+- New time entries created with `tmpo start` are automatically tagged
+
+### `tmpo milestone finish`
+
+Finish the currently active milestone for the current project. This stops auto-tagging new entries and marks the milestone as completed.
+
+```bash
+tmpo milestone finish
+# Output:
+# [tmpo] Finished milestone Sprint 1
+#     Duration: 2w 3d 5h 30m
+#     Entries: 47
+```
+
+### `tmpo milestone status`
+
+Show detailed information about the currently active milestone.
+
+```bash
+tmpo milestone status
+# Output:
+# [tmpo] Active Milestone: Sprint 1
+#     Project: my-project
+#     Started: Dec 15, 2024 9:00 AM
+#     Duration: 5d 12h 30m
+#     Entries: 23
+#     Total Time: 42h 15m
+```
+
+### `tmpo milestone list`
+
+List all milestones for the current project, grouped by active and finished.
+
+**Options:**
+
+- `--project "name"` - Show milestones for a specific project
+- `--all` - Show milestones from all projects
+
+**Examples:**
+
+```bash
+tmpo milestone list                     # List milestones for current project
+tmpo milestone list --project "webapp"  # List for specific project
+tmpo milestone list --all               # List all milestones
+```
+
+**Output:**
+
+```text
+[tmpo] Milestones for my-project
+
+─── Active ───
+  Sprint 2
+    Started: 9:00 AM  Duration: 2d 5h  Entries: 12
+
+─── Finished ───
+  Sprint 1
+    Dec 1 9:00 AM - Dec 14 5:00 PM  Duration: 1w 6d 8h  Entries: 47
+```
+
 ## Advanced Features
 
 ### `tmpo manual`
@@ -189,6 +276,7 @@ tmpo manual
 # - Start date and time
 # - End date and time
 # - Description
+# - Milestone (optional, if milestones exist for the project)
 ```
 
 This is useful for:
@@ -196,6 +284,7 @@ This is useful for:
 - Recording time before you started using tmpo
 - Adding entries when you forgot to start the timer
 - Correcting tracking mistakes
+- Manually assigning entries to specific milestones (even finished ones)
 
 ### `tmpo edit`
 
@@ -263,9 +352,9 @@ Export your time tracking data to CSV or JSON.
 
 - `--format [csv|json]` - Output format (default: csv)
 - `--project "Name"` - Filter by specific project
+- `--milestone "Name"` - Filter by milestone name
 - `--today` - Export only today's entries
 - `--week` - Export this week's entries
-- `--month` - Export this month's entries
 - `--output filename` - Specify output file path
 
 **Examples:**
@@ -274,6 +363,7 @@ Export your time tracking data to CSV or JSON.
 tmpo export                              # Export all as CSV
 tmpo export --format json                # Export as JSON
 tmpo export --project "My Project"       # Filter by project
+tmpo export --milestone "Sprint 1"       # Filter by milestone
 tmpo export --today                      # Export today's entries
 tmpo export --week                       # Export this week
 tmpo export --output timesheet.csv       # Specify output file
@@ -282,8 +372,8 @@ tmpo export --output timesheet.csv       # Specify output file
 **CSV Format:**
 
 ```csv
-Project,Description,Start,End,Duration (hours)
-my-project,Implementing feature,2024-01-15 14:30:00,2024-01-15 16:45:00,2.25
+Project,Description,Milestone,Start,End,Duration (hours)
+my-project,Implementing feature,Sprint 1,2024-01-15 14:30:00,2024-01-15 16:45:00,2.25
 ```
 
 **JSON Format:**
@@ -293,6 +383,7 @@ my-project,Implementing feature,2024-01-15 14:30:00,2024-01-15 16:45:00,2.25
   {
     "project": "my-project",
     "description": "Implementing feature",
+    "milestone": "Sprint 1",
     "start": "2024-01-15T14:30:00Z",
     "end": "2024-01-15T16:45:00Z",
     "duration_hours": 2.25
@@ -358,4 +449,49 @@ tmpo stop
 
 # Later, correlate with git log to recall what you did
 git log --since="2 hours ago" --oneline
+```
+
+### Sprint/Milestone-Based Workflow
+
+Organize your work by sprints or project phases using milestones:
+
+```bash
+# Start a new sprint
+tmpo milestone start "Sprint 5"
+
+# All your work during this sprint is automatically tagged
+tmpo start "Implement user authentication"
+# ... work ...
+tmpo stop
+
+tmpo start "Fix bug #123"
+# ... work ...
+tmpo stop
+
+# Review progress at any time
+tmpo milestone status
+
+# View all entries for this sprint
+tmpo log --milestone "Sprint 5"
+
+# When the sprint ends
+tmpo milestone finish
+
+# Review completed sprint
+tmpo milestone list
+```
+
+### Retrospective Analysis
+
+Use milestones to analyze your work across different phases:
+
+```bash
+# Compare time spent across different milestones
+tmpo milestone list --all
+
+# Export specific milestone data for reporting
+tmpo export --milestone "Sprint 1"
+
+# Get detailed breakdown by milestone
+tmpo stats  # Shows breakdown by project and milestone
 ```

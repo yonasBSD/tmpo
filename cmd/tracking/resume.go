@@ -51,7 +51,7 @@ func ResumeCmd() *cobra.Command {
 				os.Exit(1)
 			}
 
-			entry, err := db.CreateEntry(lastStopped.ProjectName, lastStopped.Description, lastStopped.HourlyRate)
+			entry, err := db.CreateEntry(lastStopped.ProjectName, lastStopped.Description, lastStopped.HourlyRate, nil)
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
 				os.Exit(1)

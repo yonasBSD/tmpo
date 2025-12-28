@@ -7,17 +7,19 @@ import (
 	"time"
 
 	"github.com/DylanDevelops/tmpo/internal/export"
+	"github.com/DylanDevelops/tmpo/internal/project"
 	"github.com/DylanDevelops/tmpo/internal/storage"
 	"github.com/DylanDevelops/tmpo/internal/ui"
 	"github.com/spf13/cobra"
 )
 
 var (
-	exportFormat string
-	exportOutput string
-	exportProject string
-	exportToday bool
-	exportWeek bool
+	exportFormat    string
+	exportOutput    string
+	exportProject   string
+	exportMilestone string
+	exportToday     bool
+	exportWeek      bool
 )
 
 func ExportCmd() *cobra.Command {
@@ -38,7 +40,14 @@ func ExportCmd() *cobra.Command {
 
 			var entries []*storage.TimeEntry
 
-			if exportToday {
+			if exportMilestone != "" {
+				projectName, err := project.DetectConfiguredProject()
+				if err != nil {
+					ui.PrintError(ui.EmojiError, fmt.Sprintf("detecting project: %v", err))
+					os.Exit(1)
+				}
+				entries, err = db.GetEntriesByMilestone(projectName, exportMilestone)
+			} else if exportToday {
 				start := time.Now().Truncate(24 * time.Hour)
 				end := start.Add(24 * time.Hour)
 				entries, err = db.GetEntriesByDateRange(start, end)
@@ -111,6 +120,7 @@ func ExportCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&exportFormat, "format", "f", "csv", "Export format (csv or json)")
 	cmd.Flags().StringVarP(&exportOutput, "output", "o", "", "Output filename")
 	cmd.Flags().StringVarP(&exportProject, "project", "p", "", "Filter by project")
+	cmd.Flags().StringVarP(&exportMilestone, "milestone", "m", "", "Filter by milestone")
 	cmd.Flags().BoolVarP(&exportToday, "today", "t", false, "Export today's entries")
 	cmd.Flags().BoolVarP(&exportWeek, "week", "w", false, "Export this week's entries")
 

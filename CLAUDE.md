@@ -40,17 +40,17 @@ goreleaser build --snapshot --clean
 
 **CLI Layer** (`cmd/`):
 - Uses Cobra for command structure
-- Commands organized in subdirectories: tracking/, entries/, history/, setup/, utilities/
+- Commands organized in subdirectories: tracking/, entries/, history/, setup/, utilities/, milestones/
 - Each command is a constructor function that returns `*cobra.Command`
 - All commands explicitly registered in `cmd/root.go` RootCmd() function
 - Version information is injected via ldflags during build
 
 **Storage Layer** (`internal/storage/`):
 - `db.go`: Database wrapper around `*sql.DB` with all query methods
-- `models.go`: TimeEntry struct with Duration() and IsRunning() helper methods
+- `models.go`: TimeEntry and Milestone structs with helper methods (Duration(), IsRunning(), IsActive())
 - Uses modernc.org/sqlite (pure Go implementation)
 - Database location: `$HOME/.tmpo/tmpo.db` (or `$HOME/.tmpo-dev/tmpo.db` if TMPO_DEV is set to "1" or "true")
-- Schema: time_entries table with id, project_name, start_time, end_time, description, hourly_rate
+- Schema: time_entries table with milestone_name column, milestones table for organizing work
 - Development mode uses separate directory to avoid conflicts with production data
 
 **Configuration** (`internal/settings/`):

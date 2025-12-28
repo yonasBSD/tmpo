@@ -124,14 +124,16 @@ goreleaser build --snapshot --clean
 
 ## Project Structure
 
-```
+```text
 tmpo/
 ├── cmd/                # CLI commands (Using Cobra)
 │   ├── root.go         # Root command with RootCmd() constructor
 │   ├── tracking/       # Time tracking commands (start, stop, pause, resume, status)
 │   ├── entries/        # Entry management (edit, delete, manual)
 │   ├── history/        # History commands (log, stats, export)
+│   ├── milestones/     # Milestone management (start, finish, status, list)
 │   ├── setup/          # Setup commands (init)
+│   ├── config/         # Global configuration (config/settings/preferences)
 │   └── utilities/      # Utility commands (version)
 ├── internal/
 │   ├── settings/       # Configuration management (.tmporc and global config)
@@ -155,6 +157,7 @@ tmpo/
   - **`cmd/setup/`**: Setup and initialization commands (init)
   - **`cmd/utilities/`**: Utility commands and version information (version)
   - **`cmd/config/`**: Global configuration command (config/settings/preferences)
+  - **`cmd/milestones/`**: Milestone management commands (start, finish, status, list)
 - **`internal/settings/`**: Configuration management (`.tmporc` files and global `config.yaml`)
 - **`internal/storage/`**: SQLite database operations and models
 - **`internal/project/`**: Project name detection logic (git/directory/config)
@@ -166,7 +169,7 @@ tmpo/
 
 All user data is stored locally in:
 
-```
+```text
 ~/.tmpo/              # Production (default)
   ├── tmpo.db         # SQLite database
   └── config.yaml     # Global configuration (optional)
@@ -222,7 +225,7 @@ Use descriptive branch names such as:
 
 Use clear, imperative commit messages:
 
-```
+```text
 Add pause/resume functionality
 
 - Implement pause command to temporarily stop tracking

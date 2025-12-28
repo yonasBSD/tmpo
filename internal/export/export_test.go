@@ -57,7 +57,7 @@ func TestToCSV(t *testing.T) {
 		assert.Len(t, records, 3)
 
 		// Verify header
-		assert.Equal(t, []string{"Project", "Start Time", "End Time", "Duration (hours)", "Description"}, records[0])
+		assert.Equal(t, []string{"Project", "Start Time", "End Time", "Duration (hours)", "Description", "Milestone"}, records[0])
 
 		// Verify first entry
 		assert.Equal(t, "test-project", records[1][0])
@@ -65,6 +65,7 @@ func TestToCSV(t *testing.T) {
 		assert.Equal(t, "2024-01-01 17:00:00", records[1][2])
 		assert.Equal(t, "8.00", records[1][3]) // 8 hours
 		assert.Equal(t, "Test work", records[1][4])
+		assert.Equal(t, "", records[1][5]) // No milestone
 	})
 
 	t.Run("handles running entries", func(t *testing.T) {
