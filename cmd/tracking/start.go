@@ -51,13 +51,11 @@ func StartCmd() *cobra.Command {
 				description = args[0]
 			}
 
-			// Load config to get hourly rate if available
 			var hourlyRate *float64
 			if cfg, _, err := settings.FindAndLoad(); err == nil && cfg != nil && cfg.HourlyRate > 0 {
 				hourlyRate = &cfg.HourlyRate
 			}
 
-			// Check for active milestone
 			var milestoneName *string
 			activeMilestone, err := db.GetActiveMilestoneForProject(projectName)
 

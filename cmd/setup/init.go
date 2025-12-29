@@ -31,7 +31,6 @@ func InitCmd() *cobra.Command {
 				os.Exit(1)
 			}
 
-			// Detect default project name
 			defaultName := detectDefaultProjectName()
 
 			var name string
