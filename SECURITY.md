@@ -6,8 +6,8 @@ We release security updates for the following versions of tmpo:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
-| < 0.1.0 | :x:                |
+| 0.3.x   | :white_check_mark: |
+| < 0.3.0 | :x:                |
 
 We recommend always using the latest stable release to ensure you have the most recent security patches.
 
