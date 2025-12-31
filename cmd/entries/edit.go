@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DylanDevelops/tmpo/internal/settings"
 	"github.com/DylanDevelops/tmpo/internal/project"
+	"github.com/DylanDevelops/tmpo/internal/settings"
 	"github.com/DylanDevelops/tmpo/internal/storage"
 	"github.com/DylanDevelops/tmpo/internal/ui"
 	"github.com/manifoldco/promptui"
@@ -132,12 +132,13 @@ func EditCmd() *cobra.Command {
 			selectedEntry := items[idx].Entry
 
 			editedEntry := &storage.TimeEntry{
-				ID:          selectedEntry.ID,
-				ProjectName: selectedEntry.ProjectName,
-				StartTime:   selectedEntry.StartTime,
-				EndTime:     selectedEntry.EndTime,
-				Description: selectedEntry.Description,
-				HourlyRate:  selectedEntry.HourlyRate,
+				ID:            selectedEntry.ID,
+				ProjectName:   selectedEntry.ProjectName,
+				StartTime:     selectedEntry.StartTime,
+				EndTime:       selectedEntry.EndTime,
+				Description:   selectedEntry.Description,
+				HourlyRate:    selectedEntry.HourlyRate,
+				MilestoneName: selectedEntry.MilestoneName,
 			}
 
 			// Edit start date
@@ -244,6 +245,50 @@ func EditCmd() *cobra.Command {
 				descriptionInput = currentDescription
 			}
 
+			// edit assignment of milestone
+			milestones, err := db.GetMilestonesByProject(projectName)
+			if err != nil {
+				ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
+				os.Exit(1)
+			}
+
+			var newMilestoneName *string
+			if len(milestones) > 0 {
+				milestoneOptions := []string{"(None)"}
+				selectedIndex := 0
+
+				for i, m := range milestones {
+					status := "Active"
+					if !m.IsActive() {
+						status = "Finished"
+					}
+					milestoneOptions = append(milestoneOptions, fmt.Sprintf("%s (%s)", m.Name, status))
+
+					// first select current milestone if match
+					if selectedEntry.MilestoneName != nil && m.Name == *selectedEntry.MilestoneName {
+						selectedIndex = i + 1
+					}
+				}
+
+				milestonePrompt := promptui.Select{
+					Label:     "Assign to milestone (optional)",
+					Items:     milestoneOptions,
+					CursorPos: selectedIndex,
+				}
+
+				milestoneIdx, _, err := milestonePrompt.Run()
+				if err != nil {
+					ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
+					os.Exit(1)
+				}
+
+				// if not its not empty set the milestone
+				if milestoneIdx > 0 {
+					selectedMilestone := milestones[milestoneIdx-1]
+					newMilestoneName = &selectedMilestone.Name
+				}
+			}
+
 			// Parse the new times
 			newStartTime, err := parseDateTime(startDateInput, startTimeInput, dateFormatLayout)
 			if err != nil {
@@ -260,6 +305,53 @@ func EditCmd() *cobra.Command {
 			editedEntry.StartTime = newStartTime
 			editedEntry.EndTime = &newEndTime
 			editedEntry.Description = descriptionInput
+			editedEntry.MilestoneName = newMilestoneName
+
+			// warn if outside of time range
+			if newMilestoneName != nil {
+				milestone, err := db.GetMilestoneByName(projectName, *newMilestoneName)
+				if err == nil && milestone != nil {
+					entryOutsideRange := false
+					warningMsg := ""
+
+					if newStartTime.Before(milestone.StartTime) {
+						entryOutsideRange = true
+						warningMsg = fmt.Sprintf("Entry starts (%s) before milestone began (%s)",
+							settings.FormatDateTimeDashed(newStartTime),
+							settings.FormatDateTimeDashed(milestone.StartTime))
+					} else if milestone.EndTime != nil && newStartTime.After(*milestone.EndTime) {
+						entryOutsideRange = true
+						warningMsg = fmt.Sprintf("Entry starts (%s) after milestone ended (%s)",
+							settings.FormatDateTimeDashed(newStartTime),
+							settings.FormatDateTimeDashed(*milestone.EndTime))
+					}
+
+					if entryOutsideRange {
+						fmt.Println()
+						ui.PrintWarning(ui.EmojiWarning, "Entry not within milestone timeframe")
+						ui.PrintMuted(0, warningMsg)
+						ui.PrintMuted(0, "This is allowed - milestones are organizational tags and work with any date range.")
+						fmt.Println()
+
+						confirmPrompt := promptui.Select{
+							Label: "Assign this entry to the milestone?",
+							Items: []string{"Yes", "No"},
+						}
+
+						_, result, err := confirmPrompt.Run()
+						if err != nil {
+							ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
+							os.Exit(1)
+						}
+
+						if result == "No" {
+							ui.PrintWarning(ui.EmojiWarning, "Milestone assignment cancelled")
+							ui.NewlineBelow()
+							os.Exit(0)
+						}
+					}
+				}
+			}
 
 			// Show confirmation with diff
 			fmt.Println()
@@ -291,6 +383,20 @@ func EditCmd() *cobra.Command {
 			if selectedEntry.Description != editedEntry.Description {
 				hasChanges = true
 				fmt.Printf("    %s %s → %s\n", ui.Bold("Description:"), ui.Muted(fmt.Sprintf("%q", selectedEntry.Description)), fmt.Sprintf("%q", editedEntry.Description))
+			}
+
+			// check if the milestone has changed
+			oldMilestone := "(None)"
+			if selectedEntry.MilestoneName != nil {
+				oldMilestone = *selectedEntry.MilestoneName
+			}
+			newMilestone := "(None)"
+			if editedEntry.MilestoneName != nil {
+				newMilestone = *editedEntry.MilestoneName
+			}
+			if oldMilestone != newMilestone {
+				hasChanges = true
+				fmt.Printf("    %s %s → %s\n", ui.Bold("Milestone:"), ui.Muted(oldMilestone), newMilestone)
 			}
 
 			if !hasChanges {
