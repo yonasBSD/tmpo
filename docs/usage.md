@@ -316,16 +316,17 @@ tmpo edit --show-all-projects    # Select project first, then entry
 
 **Milestone Assignment with Date Warnings:**
 
-When assigning an entry to a milestone, tmpo checks if the entry's date falls within the milestone's timeframe. If the entry is outside the milestone's date range, you'll see a warning:
+When assigning an entry to a milestone, tmpo checks if the entry's date falls within the milestone's timeframe. If the entry is outside the milestone's date range, you'll see an informative warning:
 
 ```text
-⚠️  Date Range Mismatch
+⚠️  Entry not within milestone timeframe
 Entry starts (Jan 5, 2024) before milestone began (Jan 10, 2024)
+This is allowed - milestones are organizational tags and work with any date range.
 
-Continue with this milestone assignment? [Yes/No]
+Assign this entry to the milestone? [Yes/No]
 ```
 
-You can still proceed with the assignment - milestones are organizational tags and entries remain tagged regardless of dates. This is useful for reorganizing historical entries or handling edge cases.
+You can freely assign entries to any milestone regardless of dates - milestones are organizational tags, not strict time boundaries. This is useful for reorganizing historical entries or handling edge cases.
 
 **When to use:**
 

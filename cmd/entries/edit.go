@@ -328,12 +328,13 @@ func EditCmd() *cobra.Command {
 
 					if entryOutsideRange {
 						fmt.Println()
-						ui.PrintWarning(ui.EmojiWarning, "Date Range Mismatch")
+						ui.PrintWarning(ui.EmojiWarning, "Entry not within milestone timeframe")
 						ui.PrintMuted(0, warningMsg)
+						ui.PrintMuted(0, "This is allowed - milestones are organizational tags and work with any date range.")
 						fmt.Println()
 
 						confirmPrompt := promptui.Select{
-							Label: "Continue with this milestone assignment?",
+							Label: "Assign this entry to the milestone?",
 							Items: []string{"Yes", "No"},
 						}
 
