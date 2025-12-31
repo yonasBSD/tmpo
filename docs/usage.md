@@ -291,7 +291,7 @@ This is useful for:
 
 ### `tmpo edit`
 
-Edit an existing time entry using an interactive menu. Select an entry and modify its start time, end time, or description.
+Edit an existing time entry using an interactive menu. Select an entry and modify its start time, end time, description, or milestone assignment.
 
 **Options:**
 
@@ -310,14 +310,31 @@ tmpo edit --show-all-projects    # Select project first, then entry
 2. Edit start date and time (dates use your configured format - press Enter to keep current value)
 3. Edit end date and time (dates use your configured format - press Enter to keep current value)
 4. Edit description (press Enter to keep current value)
-5. Review your changes with a diff view
-6. Confirm to save or discard changes
+5. Assign to milestone (optional - select from available milestones or "(None)" to remove)
+6. Review your changes with a diff view
+7. Confirm to save or discard changes
+
+**Milestone Assignment with Date Warnings:**
+
+When assigning an entry to a milestone, tmpo checks if the entry's date falls within the milestone's timeframe. If the entry is outside the milestone's date range, you'll see an informative warning:
+
+```text
+⚠️  Entry not within milestone timeframe
+Entry starts (Jan 5, 2024) before milestone began (Jan 10, 2024)
+This is allowed - milestones are organizational tags and work with any date range.
+
+Assign this entry to the milestone? [Yes/No]
+```
+
+You can freely assign entries to any milestone regardless of dates - milestones are organizational tags, not strict time boundaries. This is useful for reorganizing historical entries or handling edge cases.
 
 **When to use:**
 
 - Correct accidentally recorded times
 - Fix typos in descriptions
 - Adjust times when you forgot to stop the timer
+- Reassign entries to different milestones
+- Add milestone tags to entries created before the milestone existed
 - Update entries after reviewing your work log
 
 ### `tmpo delete`
