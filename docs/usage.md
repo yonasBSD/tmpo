@@ -125,6 +125,7 @@ Configure global user preferences that apply across all projects. This includes:
 - **Date Format** - Choose between MM/DD/YYYY, DD/MM/YYYY, or YYYY-MM-DD
 - **Time Format** - Choose between 24-hour (15:30) or 12-hour (3:30 PM)
 - **Timezone** - IANA timezone for your location (e.g., America/New_York)
+- **Export Path** - Default directory for exported files (type "clear" to remove)
 
 **Usage:**
 
@@ -136,11 +137,13 @@ tmpo config
 #   Date format: MM/DD/YYYY
 #   Time format: 12-hour (AM/PM)
 #   Timezone:    (local)
+#   Export path: (current directory)
 #
 # Currency code (press Enter for USD): EUR
 # Select date format: [use arrow keys]
 # Select time format: [use arrow keys]
 # Timezone (press Enter for local): Europe/London
+# Export path (press Enter to keep current): ~/Documents/timesheets
 #
 # [tmpo] Configuration saved to ~/.tmpo/config.yaml
 ```
@@ -156,6 +159,7 @@ Create a `.tmporc` configuration file for the current project using an interacti
 - **Project name** - Defaults to auto-detected name from Git repo or directory
 - **Hourly rate** - Optional billing rate (press Enter to skip)
 - **Description** - Optional project description (press Enter to skip)
+- **Export path** - Optional default export directory (press Enter to skip)
 
 **Interactive Mode (default):**
 
@@ -165,6 +169,7 @@ tmpo init
 # Project name (my-project): [Enter custom name or press Enter for default]
 # Hourly rate (press Enter to skip): 150
 # Description (press Enter to skip): Client website redesign
+# Export path (press Enter to skip): ~/Documents/client-exports
 ```
 
 **Quick Mode:**

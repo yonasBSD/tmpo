@@ -33,6 +33,7 @@ This launches an interactive configuration wizard where you can set:
 - **Date Format** - Choose between MM/DD/YYYY, DD/MM/YYYY, or YYYY-MM-DD
 - **Time Format** - Choose between 24-hour (15:30) or 12-hour (3:30 PM)
 - **Timezone** - IANA timezone for your location (e.g., America/New_York, Europe/London)
+- **Export Path** - Default directory for exported files (type "clear" to remove)
 
 ### Global Settings
 
@@ -43,6 +44,7 @@ currency: USD
 date_format: MM/DD/YYYY
 time_format: 12-hour (AM/PM)
 timezone: America/New_York
+export_path: ~/Documents/timesheets
 ```
 
 These settings affect how tmpo displays times and currencies throughout the application:
@@ -91,6 +93,46 @@ Set your IANA timezone for accurate time tracking when working across time zones
 
 Full list: [IANA Time Zone Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 
+#### Export Path
+
+Set a default directory where exported files (CSV, JSON) will be saved. This can be overridden per-project in `.tmporc` files.
+
+**Setting the export path:**
+
+```bash
+tmpo config
+# Export path (press Enter to keep current): ~/Documents/timesheets
+```
+
+**Clearing the export path:**
+
+To remove the export path setting and revert to saving in the current directory:
+
+```bash
+tmpo config
+# Export path (press Enter to keep current): clear
+```
+
+**How it works:**
+
+- **Global setting** (`~/.tmpo/config.yaml`): Applies to all projects unless overridden
+- **Project setting** (`.tmporc`): Overrides global setting for that project
+- **If not set**: Files are exported to your current working directory
+- **Supports `~`**: Use `~/Documents` instead of `/Users/yourname/Documents`
+
+**Examples:**
+
+```yaml
+# Export to home directory
+export_path: ~/exports
+
+# Export to specific folder
+export_path: /Users/dylan/Dropbox/timesheets
+
+# No default (export to current directory)
+export_path: ""
+```
+
 ## Project Configuration
 
 ### The `.tmporc` File
@@ -108,6 +150,7 @@ tmpo init
 # - Project name (defaults to auto-detected name)
 # - Hourly rate (optional, press Enter to skip)
 # - Description (optional, press Enter to skip)
+# - Export path (optional, press Enter to skip)
 ```
 
 For quick setup without prompts, use the `--accept-defaults` flag:
@@ -135,6 +178,9 @@ hourly_rate: 125.50
 
 # [OPTIONAL] Description for this project
 description: Client project for Acme Corp
+
+# [OPTIONAL] Default export path for this project (overrides global export path)
+export_path: ~/Documents/acme-timesheets
 ```
 
 ### Configuration Fields
@@ -173,6 +219,35 @@ A longer description or notes about the project. This is for your reference and 
 
 ```yaml
 description: Q1 2024 website redesign for Acme Corp. Main contact: john@acme.com
+```
+
+#### `export_path` (optional)
+
+Default directory for exported files (CSV, JSON) for this project. This overrides the global export path setting from `tmpo config`.
+
+**Example:**
+
+```yaml
+export_path: ~/Documents/client-timesheets
+```
+
+**How priority works:**
+
+1. **Project `.tmporc` export path** - Highest priority (used if set)
+2. **Global config export path** - Used if no project-specific path
+3. **Current directory** - Default if neither is set
+
+**Supports home directory expansion:**
+
+```yaml
+export_path: ~/Dropbox/timesheets     # Expands to /Users/yourname/Dropbox/timesheets
+export_path: /absolute/path/exports   # Absolute paths work too
+```
+
+Set to empty string to export to current directory for this project:
+
+```yaml
+export_path: ""
 ```
 
 ## Project Detection Priority

@@ -76,6 +76,7 @@ This opens an interactive wizard to configure:
 - Date format (MM/DD/YYYY, DD/MM/YYYY, or YYYY-MM-DD)
 - Time format (24-hour or 12-hour)
 - Timezone (IANA format like America/New_York)
+- Export path (default directory for exported files)
 
 ### Per-Project Settings
 
