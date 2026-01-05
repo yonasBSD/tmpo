@@ -138,8 +138,9 @@ func ConfigCmd() *cobra.Command {
 			// Export path prompt
 			fmt.Println()
 			fmt.Println(ui.Muted("Default export directory for time entries (supports ~ for home directory)"))
+			fmt.Println(ui.Muted("Type 'clear' to remove the export path setting"))
 			exportPathPrompt := promptui.Prompt{
-				Label: "Export path (press Enter for current directory)",
+				Label: "Export path (press Enter to keep current)",
 			}
 
 			exportPathInput, err := exportPathPrompt.Run()
@@ -149,7 +150,10 @@ func ConfigCmd() *cobra.Command {
 			}
 
 			exportPath := strings.TrimSpace(exportPathInput)
-			if exportPath == "" {
+			// Check for special clear keywords
+			if strings.ToLower(exportPath) == "clear" || strings.ToLower(exportPath) == "none" {
+				exportPath = ""
+			} else if exportPath == "" {
 				exportPath = currentConfig.ExportPath
 			}
 
