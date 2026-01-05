@@ -51,7 +51,7 @@ func ResumeCmd() *cobra.Command {
 				os.Exit(1)
 			}
 
-			entry, err := db.CreateEntry(lastStopped.ProjectName, lastStopped.Description, lastStopped.HourlyRate, nil)
+			entry, err := db.CreateEntry(lastStopped.ProjectName, lastStopped.Description, lastStopped.HourlyRate, lastStopped.MilestoneName)
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
 				os.Exit(1)
@@ -61,6 +61,10 @@ func ResumeCmd() *cobra.Command {
 
 			if entry.Description != "" {
 				ui.PrintInfo(4, "Description", entry.Description)
+			}
+
+			if entry.MilestoneName != nil {
+				ui.PrintInfo(4, "Milestone", *entry.MilestoneName)
 			}
 
 			ui.NewlineBelow()
