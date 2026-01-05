@@ -81,17 +81,16 @@ func ExportCmd() *cobra.Command {
 
 			var exportPath string
 
-			// Try to load .tmporc config first
+			// try to load .tmporc config first
 			if config, _, err := settings.FindAndLoad(); err == nil && config.ExportPath != "" {
 				exportPath = config.ExportPath
 			} else {
-				// Fall back to global config
+				// fall back to use global config
 				if globalConfig, err := settings.LoadGlobalConfig(); err == nil && globalConfig.ExportPath != "" {
 					exportPath = globalConfig.ExportPath
 				}
 			}
 
-			// If exportPath is set, expand ~ to home directory
 			if exportPath != "" {
 				if exportPath[:1] == "~" {
 					home, err := os.UserHomeDir()
@@ -100,7 +99,7 @@ func ExportCmd() *cobra.Command {
 					}
 				}
 
-				// Ensure the export path directory exists
+				// make sure that that the path is valid
 				if err := os.MkdirAll(exportPath, 0755); err != nil {
 					ui.PrintError(ui.EmojiError, fmt.Sprintf("Failed to create export directory: %v", err))
 					os.Exit(1)
@@ -125,8 +124,8 @@ func ExportCmd() *cobra.Command {
 				filename += ".json"
 			}
 
-			// Prepend export path if configured
 			if exportPath != "" {
+				// add export path to beginning of path
 				filename = filepath.Join(exportPath, filepath.Base(filename))
 			}
 
