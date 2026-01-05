@@ -79,7 +79,7 @@ func ConfigCmd() *cobra.Command {
 
 			// Date format selection
 			fmt.Println()
-			dateFormatOptions := []string{"MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD", "Keep current"}
+			dateFormatOptions := []string{"Keep current", "MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD"}
 			dateFormatSelect := promptui.Select{
 				Label: "Select date format",
 				Items: dateFormatOptions,
@@ -98,7 +98,7 @@ func ConfigCmd() *cobra.Command {
 
 			// Time format selection
 			fmt.Println()
-			timeFormatOptions := []string{"24-hour", "12-hour (AM/PM)", "Keep current"}
+			timeFormatOptions := []string{"Keep current", "24-hour", "12-hour (AM/PM)"}
 			timeFormatSelect := promptui.Select{
 				Label: "Select time format",
 				Items: timeFormatOptions,
