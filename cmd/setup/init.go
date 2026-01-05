@@ -28,6 +28,7 @@ func InitCmd() *cobra.Command {
 
 			if _, err := os.Stat(".tmporc"); err == nil {
 				ui.PrintError(ui.EmojiError, ".tmporc already exists in this directory")
+				ui.NewlineBelow()
 				os.Exit(1)
 			}
 
@@ -36,12 +37,14 @@ func InitCmd() *cobra.Command {
 			var name string
 			var hourlyRate float64
 			var description string
+			var exportPath string
 
 			if acceptDefaults {
 				// Use all defaults without prompting
 				name = defaultName
 				hourlyRate = 0
 				description = ""
+				exportPath = ""
 			} else {
 				// Interactive form
 				ui.PrintSuccess(ui.EmojiInit, "Initialize Project Configuration")
@@ -97,10 +100,23 @@ func InitCmd() *cobra.Command {
 				}
 
 				description = strings.TrimSpace(descInput)
+
+				// Export path prompt
+				exportPathPrompt := promptui.Prompt{
+					Label: "Export path (press Enter to skip)",
+				}
+
+				exportPathInput, err := exportPathPrompt.Run()
+				if err != nil {
+					ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
+					os.Exit(1)
+				}
+
+				exportPath = strings.TrimSpace(exportPathInput)
 			}
 
 			// Create the .tmporc file
-			err := settings.CreateWithTemplate(name, hourlyRate, description)
+			err := settings.CreateWithTemplate(name, hourlyRate, description, exportPath)
 			if err != nil {
 				ui.PrintError(ui.EmojiError, fmt.Sprintf("%v", err))
 				os.Exit(1)
@@ -113,6 +129,9 @@ func InitCmd() *cobra.Command {
 			}
 			if description != "" {
 				ui.PrintInfo(4, ui.Bold("Description"), description)
+			}
+			if exportPath != "" {
+				ui.PrintInfo(4, ui.Bold("Export path"), exportPath)
 			}
 
 			fmt.Println()

@@ -30,7 +30,7 @@ hourly_rate: %.2f
 description: "%s"
 
 # [OPTIONAL] Default export path for this project (overrides global export path)
-# export_path: ""
+export_path: "%s"
 `
 
 func Load(path string) (*Config, error) {
@@ -74,13 +74,13 @@ func Create(projectName string, hourlyRate float64) error {
 	return config.Save(tmporc)
 }
 
-func CreateWithTemplate(projectName string, hourlyRate float64, description string) error {
+func CreateWithTemplate(projectName string, hourlyRate float64, description string, exportPath string) error {
 	tmporc := filepath.Join(".", ".tmporc")
 	if _, err := os.Stat(tmporc); err == nil {
 		return fmt.Errorf(".tmporc already exists")
 	}
 
-	content := fmt.Sprintf(configTemplate, projectName, hourlyRate, description)
+	content := fmt.Sprintf(configTemplate, projectName, hourlyRate, description, exportPath)
 
 	if err := os.WriteFile(tmporc, []byte(content), 0644); err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
